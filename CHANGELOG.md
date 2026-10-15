@@ -36,30 +36,6 @@ The build uses the official Raspberry Pi source package `1.43.1-1+rpt1`, matchin
 
 Validation: the runtime binary compiled successfully, both service units passed `systemd-analyze --user verify`, and keyboard visibility and text entry passed live checks. The initial package test run failed because a Raspberry Pi source fixture omitted the `name` field from `OutputState`; the test-only patch adds `name: None`. After correcting the fixture, the optional full package test rebuild was stopped during dependency compilation once the user confirmed successful sign-in. The full upstream test suite is not reported as passing. Build logs remain in the source directory.
 
-### Home camera sizing — VideoLink 0.12.59
-
-On 2026-10-15, the custom `videolink-doorbell` card for `camera.doorbell` rendered at 443.5 px tall on the panel, while its five-row Sections grid slot reserved only 312 px. The following “Sala de Máquinas” section therefore overlapped the camera and its controls.
-
-Before the fix, the custom card reported `getGridOptions()` as `{ rows: 5, columns: 12, min_rows: 3, min_columns: 6 }`. Its height varies with video dimensions and width, so a fixed five-row allocation is insufficient. The matching source is in the sibling VideoLink repository at `frontend/videolink-doorbell.js`.
-
-The initial YAML workaround used automatic grid rows:
-
-```yaml
-grid_options:
-  columns: 12
-  rows: auto
-```
-
-Home Assistant merges explicit [card grid options](https://raw.githubusercontent.com/home-assistant/frontend/dev/src/panels/lovelace/cards/hui-card.ts) over the custom card's defaults. Its [grid sizing code](https://raw.githubusercontent.com/home-assistant/frontend/dev/src/panels/lovelace/common/compute-card-grid-size.ts) supports automatic rows.
-
-A temporary browser preview removed the fixed-height allocation: the slot then matched the camera's 443.5 px height, and the following section started 24 px after the camera ended. Temporary browser diagnostics and the preview have since been removed; the panel uses its normal startup configuration.
-
-The VideoLink frontend source in `/Users/example/Documents/GitHub/VideoLink` was fixed at version `0.12.59`: video cards return `rows: "auto"` from `getGridOptions()`; audio-only cards retain their compact sizing. The HACS bundle and its cache version are synchronized. All 29 card tests pass, including the new video sizing regression, and bundle consistency and whitespace checks pass. The standalone build is at `/tmp/videolink-card-0.12.59/videolink-doorbell-card-0.12.59.zip` on the development computer.
-
-The user deployed the update on 2026-10-15. Verification from the Pi confirmed Home Assistant serves version `0.12.59` with automatic video row height. After forcing a cache-bypassing reload, a panel screenshot confirmed the entire camera and its talk controls fit above the “Sala de Máquinas” heading without overlap. No dashboard YAML override was needed.
-
-The panel account remains a non-admin. During this repair the existing local server alias at `192.0.2.20:22` refused the connection, and the Tailscale alias at `192.0.2.30:22` timed out; deployment was performed by the user.
-
 ### Portrait dashboard — panel 0.1.1
 
 Added the no-scroll portrait dashboard and seven popups. Fixed inherited line heights and section row sizing in version 0.1.1.

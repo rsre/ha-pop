@@ -30,6 +30,4 @@ See [setup and maintenance](docs/panel-setup.md) for installation, operating che
 
 The [touchscreen keyboard notes](docs/keyboard.md) cover Chromium input support and the keyboard layer fix required for fullscreen use.
 
-The [Home camera layout notes](docs/example-camera.md) describe the installed VideoLink camera sizing and frontend updates.
-
 [CHANGELOG.md](CHANGELOG.md) records project changes, deployment history, and verification results.

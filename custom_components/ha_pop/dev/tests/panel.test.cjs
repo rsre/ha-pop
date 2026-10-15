@@ -166,3 +166,27 @@ test("doorbell navigation opens video after rendering and consumes the request w
     delete context.window.sessionStorage;
   }
 });
+
+
+test("sleep dismissal closes the popup, releases media and suppresses pending navigation", () => {
+  const card = panel();
+  const consumed = new Map();
+  let cleared = 0;
+  const dialog = { open: true, close() { this.open = false; } };
+  context.window.location = { href: "https://example.test/ha-pop-panel/home?ha_pop_doorbell=" + Date.now() };
+  context.window.sessionStorage = { getItem: key => consumed.get(key), setItem: (key, value) => consumed.set(key, value) };
+  card.shadowRoot.querySelector = selector => selector === "dialog" ? dialog : { replaceChildren() { cleared++; } };
+  card._activePopup = "camera";
+  card._popupCards = [{}];
+  try {
+    card._closePopup(true);
+    assert.equal(dialog.open, false);
+    assert.equal(card._activePopup, undefined);
+    assert.equal(card._popupCards.length, 0);
+    assert.equal(cleared, 1);
+    assert.ok(consumed.get("ha-pop-doorbell:/ha-pop-panel/home"));
+  } finally {
+    delete context.window.location;
+    delete context.window.sessionStorage;
+  }
+});

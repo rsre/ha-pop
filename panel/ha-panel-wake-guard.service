@@ -5,6 +5,10 @@ PartOf=graphical-session.target
 [Service]
 Type=notify
 ExecStart=/usr/bin/python3 %h/.local/bin/ha-panel-wake-guard.py
+# Close popups before the guard maps and powers off, so restoring browser focus
+# cannot be mistaken for wake activity. Browser failure must
+# never prevent the display from sleeping or the input guard from working.
+ExecStartPre=-/usr/bin/timeout --kill-after=1s 4s /usr/bin/python3 %h/.local/bin/ha-panel-remote.py --dismiss-popup
 ExecStopPost=/usr/bin/wlopm --on DSI-1
 TimeoutStartSec=10
 TimeoutStopSec=3

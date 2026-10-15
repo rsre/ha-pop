@@ -171,6 +171,15 @@ class BrowserTests(unittest.TestCase):
         browser.show_doorbell()
         self.assertNotIn('Page.navigate',[json.loads(c.args[0])['method'] for c in ws.send.call_args_list])
 
+    def test_sleep_dismisses_popup_without_navigation_or_foregrounding_browser(self):
+        import json
+        browser,ws = self.browser()
+        browser.dismiss_popup()
+        commands = [json.loads(c.args[0]) for c in ws.send.call_args_list]
+        self.assertEqual([c['method'] for c in commands], ['Runtime.evaluate'])
+        self.assertIn('_closePopup(true)', commands[0]['params']['expression'])
+        ws.close.assert_called_once()
+
     def test_browser_navigation_failure_is_actionable_and_closes_connection(self):
         browser,ws = self.browser(navigation_error='net::ERR_FAILED')
         with self.assertRaisesRegex(remote.BrowserError,'dashboard URL'):

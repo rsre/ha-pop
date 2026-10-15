@@ -7,6 +7,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import os
 from pathlib import Path
 import subprocess
+import sys
 import time
 import uuid
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
@@ -30,6 +31,12 @@ class PanelBrowser:
         self.connect = connect
 
     def show_doorbell(self):
+        self._control('doorbell')
+
+    def dismiss_popup(self):
+        self._control('sleep')
+
+    def _control(self, action):
         try:
             url = self.url_file.read_text().strip()
             target = urlsplit(url)
@@ -62,18 +69,40 @@ class PanelBrowser:
                             return reply.get('result', {})
                     raise BrowserError('The browser did not acknowledge the doorbell command.')
                 # An attached panel handles the event without rebuilding its live camera.
+                operation = '!window.dispatchEvent(new Event("ha-pop-doorbell", {cancelable:true}))'
+                if action == 'sleep':
+                    # Use the card's existing dismissal path, including camera
+                    # cleanup and pending-request suppression. No HA reload needed.
+                    operation = """(() => {
+                        function find(root) {
+                            const card = root.querySelector('ha-pop-panel');
+                            if (card) return card;
+                            for (const node of root.querySelectorAll('*')) {
+                                if (node.shadowRoot) {
+                                    const found = find(node.shadowRoot);
+                                    if (found) return found;
+                                }
+                            }
+                            return null;
+                        }
+                        const card = find(document);
+                        if (!card || typeof card._closePopup !== 'function') return false;
+                        card._closePopup(true);
+                        return true;
+                    })()"""
                 expression = ('location.origin === ' + json.dumps(f'{target.scheme}://{target.netloc}')
                               + ' && location.pathname === ' + json.dumps(target.path)
-                              + ' && !window.dispatchEvent(new Event("ha-pop-doorbell", {cancelable:true}))')
+                              + ' && ' + operation)
                 result = command('Runtime.evaluate', expression=expression, returnByValue=True)
-                if result.get('result', {}).get('value') is not True:
+                if action == 'doorbell' and result.get('result', {}).get('value') is not True:
                     query = dict(parse_qsl(target.query))
                     query['ha_pop_doorbell'] = str(int(time.time() * 1000))
                     destination = urlunsplit(target._replace(query=urlencode(query)))
                     result = command('Page.navigate', url=destination)
                     if result.get('errorText'):
                         raise BrowserError('The panel could not load its dashboard. Check the configured dashboard URL.')
-                command('Page.bringToFront')
+                if action == 'doorbell':
+                    command('Page.bringToFront')
             finally:
                 ws.close()
         except BrowserError:
@@ -218,4 +247,11 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    if sys.argv[1:] == ['--dismiss-popup']:
+        try:
+            PanelBrowser().dismiss_popup()
+        except BrowserError as error:
+            print(str(error), file=sys.stderr)
+            sys.exit(1)
+    else:
+        main()

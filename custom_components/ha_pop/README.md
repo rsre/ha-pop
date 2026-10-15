@@ -48,7 +48,7 @@ https://github.com/rsre/ha-pop/blob/main/custom_components/ha_pop/blueprints/doo
 
 Create an automation from it, choose the doorbell event entity, ring event type, and the panel's **Show doorbell** button. The resulting automation is editable through the normal UI. Binary-sensor doorbells can use a normal state-triggered UI automation that presses the same button.
 
-Show doorbell calls the Pi's authenticated `/doorbell` endpoint. It wakes the display and uses local browser control to return to the URL configured on the Pi, even if another dashboard or page is open. The dashboard consumes a fresh popup request once it is ready. Repeated rings keep an already-open video card intact. The integration also records a popup event after the Pi accepts the command. Talk requires an explicit user action. The popup remains open until dismissed.
+Show doorbell calls the Pi's authenticated `/doorbell` endpoint. It wakes the display and uses local browser control to return to the URL configured on the Pi, even if another dashboard or page is open. The dashboard consumes a fresh popup request once it is ready. Repeated rings keep an already-open video card intact. The integration also records a popup event after the Pi accepts the command. Talk requires an explicit user action. The popup remains open until dismissed or the panel sleeps. Sleep closes popups and releases camera media, so waking shows the main dashboard.
 
 Connection errors identify the configured panel address and suggest checking hostname resolution. If HA cannot resolve the Pi's hostname, use its LAN IP in Reconfigure. Authentication errors request the panel token; browser errors identify the kiosk service or dashboard URL to check.
 

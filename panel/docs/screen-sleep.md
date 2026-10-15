@@ -50,3 +50,5 @@ python3 -m unittest discover -s panel/tests -p 'test_wake_guard.py'
 ```
 
 For a physical check, put the panel to sleep, then tap over a control. The first tap should reveal the dashboard without operating that control.
+
+When the sleep guard starts, it dismisses panel popups and releases their camera media through local browser control. This applies to both idle timeout and Home Assistant's Sleep button. A browser-control failure does not prevent sleep or guarded touch wake.

@@ -4,6 +4,8 @@ Project changes and verification history. Deployment addresses, account names, e
 
 ## Unreleased — integration 0.2.3
 
+- Close panel popups and release camera media when the sleep guard activates, for idle timeout and explicit sleep. Mark pending doorbell navigation dismissed so waking returns to the main dashboard. Browser-control failure does not block sleep.
+
 - Check the system reboot watcher without sudo before writing a reboot request. Inactive, missing, or unqueryable watchers return a clear error and leave the request file unchanged. Existing account sudo permissions are unchanged.
 
 - Added a configuration-category Reboot button with the restart device class and an authenticated Pi `/reboot` endpoint. The endpoint records a request file watched by a root-owned systemd path unit; a fixed service waits three seconds so the HTTP response completes, then reboots. This feature adds no sudo grant, the reboot command exists only in root-owned unit files, and repeated presses while a reboot is pending are harmless. The units install with `sudo bash panel/install-reboot.sh`, which is idempotent: unchanged units are left in place and only replaced files are backed up. Missing request paths report an actionable scheduling failure. Offline endpoint, client, runtime, button-attribute, and version-consistency checks cover the feature; live watcher and isolated request-file checks passed without triggering a reboot.

@@ -2,7 +2,10 @@
 
 Project changes and verification history. Deployment addresses, account names, entity mappings, and private backup locations are intentionally excluded from the public record. Current setup is described in the [panel guide](panel/README.md) and [integration guide](custom_components/ha_pop/README.md).
 
-## Unreleased — integration 0.2.1
+## Integration 0.2.2
+- Hide the HA toolbar on the Pi using `ha_pop_kiosk=1`, reclaiming its height for the dashboard. Other browsers and pages retain the normal toolbar.
+
+## Integration 0.2.1
 
 - Fixed Show doorbell while the kiosk is on another page: wake the display, return to its configured dashboard, and open live video. Repeated requests retain an already-open stream. Browser control listens only on loopback.
 - Added specific connection, authentication, display-power, and browser-control errors.

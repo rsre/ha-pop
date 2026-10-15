@@ -1,4 +1,4 @@
-const HA_POP_VERSION = "0.2.1";
+const HA_POP_VERSION = "0.2.3";
 
 const HA_POP_ENTITIES = Object.freeze({
   kitchen_1: "switch.kitchen_light_1",
@@ -41,6 +41,7 @@ class HaPopPanel extends HTMLElement {
 
   set hass(hass) {
     this._hass = hass;
+    if (this.isConnected) this._hideKioskHeader();
     if (this._rendered) this._update();
     for (const card of this._popupCards) card.hass = hass;
     this._handleDoorbellCommand();
@@ -65,6 +66,7 @@ class HaPopPanel extends HTMLElement {
   getGridOptions() { return { rows: "auto", columns: "full" }; }
 
   connectedCallback() {
+    this._hideKioskHeader();
     this._onDoorbellCommand ??= (event) => {
       if (!this._rendered || !this._hass) return;
       event.preventDefault();
@@ -78,11 +80,30 @@ class HaPopPanel extends HTMLElement {
   }
 
   disconnectedCallback() {
+    this._kioskHeaderStyle?.remove();
+    this._kioskHeaderStyle = undefined;
     window.removeEventListener("ha-pop-doorbell", this._onDoorbellCommand);
     clearTimeout(this._doorbellNavigationTimer);
     clearInterval(this._clockTimer);
     clearInterval(this._cameraTimer);
     this._closePopup();
+  }
+
+  _hideKioskHeader() {
+    if (!window.location || new URL(window.location.href).searchParams.get("ha_pop_kiosk") !== "1") return;
+    if (this._kioskHeaderStyle?.isConnected) return;
+    let node = this;
+    while (node) {
+      const root = node.getRootNode();
+      if (root.host?.localName === "hui-root") {
+        const style = this.ownerDocument.createElement("style");
+        style.textContent = ":host { --header-height:0px !important; } .header { display:none !important; } hui-view-container, hui-view-container.has-tab-bar { padding-top:0 !important; }";
+        root.appendChild(style);
+        this._kioskHeaderStyle = style;
+        return;
+      }
+      node = root.host;
+    }
   }
 
   _showDoorbell() {

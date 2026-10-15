@@ -6,7 +6,7 @@ This directory contains everything installed on the Raspberry Pi: the Chromium l
 
 The panel is a Raspberry Pi 5 running Raspberry Pi OS 64-bit, Debian 13.7 (trixie). LightDM automatically logs into labwc as `ha`. The hostname is configured in Raspberry Pi OS; Avahi can advertise `panel.local` on the local network.
 
-The display is mounted in portrait at 720 × 1280, 60 Hz, with touch mapped to `DSI-1`. Chromium opens `https://homeassistant.example/ha-pop-panel/home` in fullscreen kiosk mode using a persistent Home Assistant session. The [dashboard guide](../custom_components/ha_pop/docs/dashboard.md) covers its sections and popup controls.
+The display is mounted in portrait at 720 × 1280, 60 Hz, with touch mapped to `DSI-1`. Chromium opens `https://homeassistant.example/ha-pop-panel/home?ha_pop_kiosk=1` in fullscreen kiosk mode using a persistent Home Assistant session. The [dashboard guide](../custom_components/ha_pop/docs/dashboard.md) covers its sections and popup controls.
 
 The panel uses an [overlay keyboard](docs/keyboard.md), [guarded touch wake](docs/screen-sleep.md), and [Home Assistant wake, sleep, and doorbell commands](../custom_components/ha_pop/README.md). The browser, keyboard, idle handler, and remote command endpoint start through labwc autostart.
 

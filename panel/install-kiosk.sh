@@ -6,6 +6,15 @@ case "$url" in
     http://*|https://*) ;;
     *) echo 'URL must use HTTP or HTTPS' >&2; exit 1 ;;
 esac
+url=$(python3 - "$url" <<'PY'
+import sys
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+url = urlsplit(sys.argv[1])
+query = dict(parse_qsl(url.query))
+query['ha_pop_kiosk'] = '1'
+print(urlunsplit(url._replace(query=urlencode(query))))
+PY
+)
 for program in chromium curl labwc systemctl; do
     command -v "$program" >/dev/null
 done

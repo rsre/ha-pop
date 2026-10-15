@@ -1,33 +1,32 @@
-# Home Assistant panel
+# HA Pop Panel
 
-A dedicated touchscreen controller for Home Assistant. Powering on the panel opens the control dashboard in fullscreen Chromium, with no desktop interaction required.
+A Raspberry Pi touchscreen for Home Assistant: a portrait dashboard, large touch targets, camera popups, guarded tap-to-wake, and remote wake/sleep controls.
 
-| Component | Details |
+| Directory | Purpose |
 | --- | --- |
-| Computer | Raspberry Pi 5 |
-| Display | Raspberry Pi Touch Display 2, 7-inch |
-| Storage | 64 GB microSD |
-| Panel address | `192.0.2.10` / `panel.local` |
-| Home Assistant | `https://homeassistant.example/` |
-| Touchscreen dashboard | [`Panel`](https://homeassistant.example/dashboard-panel/casa), portrait 720 × 1280 |
-| Screen sleep | After 5 minutes idle; first tap wakes without operating controls |
-| Doorbell | Home Assistant wakes the panel and opens the Portón video popup |
-| Operating system | Raspberry Pi OS 64-bit, Debian 13.7 (trixie), image 2026-10-06 |
-| Hostname / desktop user | `panel` / `paneluser` |
-| Deployment | Portrait dashboard with seven popups, touch wake, and remote commands |
+| [`panel/`](panel/README.md) | Pi launcher, keyboard, sleep guard, remote endpoint, and installer |
+| [`custom_components/ha_pop/`](custom_components/ha_pop) | Home Assistant integration and bundled frontend, installed through HACS |
+| [`homeassistant/`](homeassistant/README.md) | Integration guide, dashboard guide, tests, and release tools |
 
-The Pi is a browser client. Home Assistant continues running on its existing server.
+The integration is at the repository root under `custom_components/` to follow the [HACS integration layout](https://www.hacs.xyz/docs/publish/integration/). Pi software remains separate.
 
-SSH: `ssh paneluser@panel.local -i ~/.ssh/homeassistant` (or use `192.0.2.10`).
+1. Install the [Pi software](panel/README.md).
+2. Add this repository to HACS as an Integration, download HA Pop Panel, and restart Home Assistant.
+3. Add **HA Pop Panel** under Settings → Devices & services. Enter the panel address and shared token, choose the camera, and choose an unused dashboard URL.
+4. Use the integration's Wake, Sleep, and Show doorbell buttons in automations.
 
-The [touchscreen dashboard guide](docs/dashboard.md) covers its sections, popup controls, source, deployment, tests, and rollback.
+No SSH access to Home Assistant, Supervisor token, YAML package editing, or Python dependency installation is needed for the integration. Setup uses the Pi's authenticated health endpoint without waking the display. Existing local deployments must update the Pi endpoint to version 0.2.0 first.
 
-The [remote control guide](docs/remote-control.md) covers Home Assistant wake commands and the doorbell video automation.
+The default dashboard targets a 7-inch display at 720 × 1280 and uses example entity IDs. Choose real controls through the dashboard UI. Camera video uses Home Assistant's native card; an installed VideoLink card supplies talk controls automatically.
 
-The [screen sleep guide](docs/screen-sleep.md) covers idle display power-off and touch wake.
+[CHANGELOG.md](CHANGELOG.md) records changes. [PUBLICATION.md](PUBLICATION.md) records the privacy audit and publication steps. Local deployment snapshots are ignored under `.local/` and excluded from release archives.
 
-See [setup and maintenance](docs/panel-setup.md) for installation, operating checks, and recovery procedures. No passwords, private keys, or browser profiles belong in this repository.
+## Development checks
 
-The [touchscreen keyboard notes](docs/keyboard.md) cover Chromium input support and the keyboard layer fix required for fullscreen use.
-
-[CHANGELOG.md](CHANGELOG.md) records project changes, deployment history, and verification results.
+```sh
+python3 -m pip install -r homeassistant/requirements-dev.txt
+python3 -m unittest discover -s panel/tests
+python3 -m unittest discover -s homeassistant/tests
+node --test homeassistant/tests/panel.test.cjs
+python3 homeassistant/build_release.py
+```

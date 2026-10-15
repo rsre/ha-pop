@@ -52,7 +52,7 @@ Show doorbell calls the Pi's authenticated `/doorbell` endpoint. It wakes the di
 
 Connection errors identify the configured panel address and suggest checking hostname resolution. If HA cannot resolve the Pi's hostname, use its LAN IP in Reconfigure. Authentication errors request the panel token; browser errors identify the kiosk service or dashboard URL to check.
 
-The **Reboot** button appears under the panel device's configuration controls. It calls the authenticated `/reboot` endpoint; a fixed root-owned service on the Pi waits three seconds so the request completes, then restarts the device. For **Wall Panel**, its entity is `button.wall_panel_reboot`. On the Pi this requires the reboot units from `sudo bash panel/install-reboot.sh` (see the [panel guide](../../panel/README.md)); the panel account keeps no sudo grant. Press the button only when a restart is intended.
+The **Reboot** button appears under the panel device's configuration controls. It calls the authenticated `/reboot` endpoint; a fixed root-owned service on the Pi waits three seconds so the request completes, then restarts the device. For **Wall Panel**, its entity is `button.wall_panel_reboot`. On the Pi this requires the reboot units from `sudo bash panel/install-reboot.sh` (see the [panel guide](../../panel/README.md)); this feature adds no sudo grant. The endpoint checks the watcher without sudo and reports “Panel reboot service is not running” if it is unavailable. Press the button only when a restart is intended.
 
 ## Dashboard and updates
 

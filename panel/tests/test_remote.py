@@ -207,15 +207,35 @@ class DoorbellEndpointTests(unittest.TestCase):
 
 
 class RebootTests(unittest.TestCase):
-    def test_reboot_records_a_request_without_running_any_command(self):
+    def test_reboot_checks_system_watcher_without_sudo_before_recording_request(self):
         import tempfile
         calls = []
         with tempfile.TemporaryDirectory() as folder:
             request = Path(folder) / 'reboot-request'
-            controller = remote.WakeController(run=lambda args, **kw: calls.append(args), reboot_file=request)
+            def run(args, **kw):
+                self.assertFalse(request.exists())
+                calls.append(args)
+            controller = remote.WakeController(run=run, reboot_file=request)
             controller.reboot()
-            self.assertEqual(calls, [])
+            self.assertEqual(calls, [('/usr/bin/systemctl', 'is-active', '--quiet', 'ha-panel-reboot.path')])
             self.assertTrue(request.read_text().strip())
+
+    def test_inactive_or_unqueryable_watcher_does_not_write_reboot_request(self):
+        import tempfile
+        for error in [subprocess.CalledProcessError(3, 'systemctl'),
+                      subprocess.TimeoutExpired('systemctl', 15), FileNotFoundError('systemctl')]:
+            with self.subTest(error=type(error).__name__), tempfile.TemporaryDirectory() as folder:
+                request = Path(folder) / 'reboot-request'
+                def run(*args, **kwargs):
+                    raise error
+                controller = remote.WakeController(run=run, reboot_file=request)
+                with self.assertRaisesRegex(remote.RebootError, 'Panel reboot service is not running'):
+                    controller.reboot()
+                self.assertFalse(request.exists())
+                request.write_text('previous request\n')
+                with self.assertRaises(remote.RebootError):
+                    controller.reboot()
+                self.assertEqual(request.read_text(), 'previous request\n')
 
     def test_missing_reboot_service_is_reported_actionably(self):
         import tempfile

@@ -110,8 +110,12 @@ class WakeController:
 
     def reboot(self):
         try:
+            self.command('/usr/bin/systemctl', 'is-active', '--quiet', 'ha-panel-reboot.path')
+        except (OSError, subprocess.SubprocessError) as error:
+            raise RebootError('Panel reboot service is not running. Check ha-panel-reboot.path on the Pi.') from error
+        try:
             # A root-owned path unit watches this file and starts the fixed reboot
-            # service. The panel account is never granted sudo access.
+            # service. This feature does not require a sudo grant.
             self.reboot_file.write_text(f'{time.time()}\n')
         except OSError as error:
             raise RebootError('Cannot record the Pi reboot request. Check that the ha-panel-reboot service is installed on the panel.') from error

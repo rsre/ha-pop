@@ -5,11 +5,13 @@ const fs = require("node:fs");
 
 const context = vm.createContext({
   HTMLElement: class { attachShadow() { this.shadowRoot = {}; } addEventListener() {} },
-  customElements: { get: name => name === "videolink-doorbell" ? class {} : undefined, define: () => {} },
+  customElements: { get: name => ["videolink-doorbell", "home-assistant"].includes(name) ? class {} : undefined, define: () => {} },
   window: {},
   URL,
+  setTimeout,
+  clearTimeout,
 });
-vm.runInContext(fs.readFileSync(require("node:path").join(__dirname, "../../frontend/ha-pop-panel.js"), "utf8") + "\nglobalThis.Panel = HaPopPanel;", context);
+vm.runInContext(fs.readFileSync(require("node:path").join(__dirname, "../../frontend/ha-pop-panel-card.js"), "utf8") + "\nglobalThis.Panel = HaPopPanel;", context);
 
 function panel(overrides = {}) {
   const card = new context.Panel();
@@ -112,5 +114,55 @@ test("camera works with the native HA card when no video/talk card is installed"
     assert.equal(config.camera_view, "live");
   } finally {
     context.customElements.get = original;
+  }
+});
+
+
+test("doorbell navigation opens video after rendering and consumes the request without replay", async () => {
+  const card = panel();
+  let opens = 0;
+  card._showDoorbell = () => { opens++; };
+  context.window.location = { href: "https://example.test/ha-pop-panel/home?ha_pop_doorbell=" + Date.now() };
+  const consumed = new Map();
+  context.window.sessionStorage = { getItem: key => consumed.get(key), setItem: (key, value) => consumed.set(key, value) };
+  try {
+    card._consumeDoorbellNavigation();
+    assert.equal(opens, 0);
+    card._rendered = true;
+    card.isConnected = true;
+    card.hass = { states: {} };
+    card._consumeDoorbellNavigation();
+    assert.equal(opens, 0);
+    await new Promise(resolve => setTimeout(resolve, 150));
+    assert.equal(opens, 1);
+    assert.match(context.window.location.href, /ha_pop_doorbell=/);
+    card._consumeDoorbellNavigation();
+    assert.equal(opens, 1);
+    // HA can replace the initial card during view setup; preserve the request.
+    const replacement = panel();
+    replacement._rendered = true;
+    replacement.isConnected = true;
+    replacement._showDoorbell = () => { opens++; };
+    replacement.hass = { states: {} };
+    await new Promise(resolve => setTimeout(resolve, 150));
+    assert.equal(opens, 2);
+    replacement._dismissDoorbellNavigation();
+    const dismissed = panel();
+    dismissed._rendered = true;
+    dismissed.isConnected = true;
+    dismissed._showDoorbell = () => { opens++; };
+    dismissed.hass = { states: {} };
+    assert.equal(opens, 2);
+    context.window.location.href = "https://example.test/ha-pop-panel/home?ha_pop_doorbell=" + (Date.now() - 60000);
+    card._consumeDoorbellNavigation();
+    assert.equal(opens, 2);
+    card._activePopup = "camera";
+    card.shadowRoot.querySelector = () => ({ open: true });
+    context.Panel.prototype._showDoorbell.call(card);
+    assert.equal(opens, 2);
+  } finally {
+    clearTimeout(card._doorbellNavigationTimer);
+    delete context.window.location;
+    delete context.window.sessionStorage;
   }
 });

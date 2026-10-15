@@ -22,7 +22,7 @@ The panel uses an [overlay keyboard](docs/keyboard.md), [guarded touch wake](doc
 | Installer source copy | `$HOME/.local/share/ha-panel-source/panel` |
 | Installer backups | `$HOME/.local/state/ha-panel/backups/` |
 
-The startup hook retains `/etc/xdg/labwc/autostart`, imports the graphical session environment, and starts the panel services. The browser service restarts Chromium five seconds after it exits. The launcher waits for a successful HTTP response before opening Chromium; the desktop can remain visible while Home Assistant or the network is unavailable.
+The startup hook retains `/etc/xdg/labwc/autostart`, imports the graphical session environment, and starts the panel services. The browser service restarts Chromium five seconds after it exits. Chromium exposes browser control only on `127.0.0.1:9222`; the authenticated doorbell endpoint uses it to return to the configured dashboard and open video. No arbitrary URL or browser command is accepted over the LAN. The launcher waits for a successful HTTP response before opening Chromium; the desktop can remain visible while Home Assistant or the network is unavailable.
 
 ## Install or update
 
@@ -35,7 +35,7 @@ tar -cf - panel |
   ssh -i ~/.ssh/homeassistant ha@panel.local 'mkdir -p ~/.local/share/ha-panel-source; tar -xf - -C ~/.local/share/ha-panel-source'
 ```
 
-The installer requires Chromium, curl, labwc, systemd user services, swayidle, wlopm, Python GTK3 bindings, `gir1.2-gtklayershell-0.1`, and `python3-gi-cairo`. Prepare the patched Squeekboard binary using the [keyboard build guide](docs/keyboard.md). Run the complete installer as the desktop user in the graphical session, or over SSH with its session environment imported into the user service manager:
+The installer requires Chromium, curl, labwc, systemd user services, swayidle, wlopm, Python GTK3 bindings, `gir1.2-gtklayershell-0.1`, `python3-gi-cairo`, and `python3-websocket`. Prepare the patched Squeekboard binary using the [keyboard build guide](docs/keyboard.md). Run the complete installer as the desktop user in the graphical session, or over SSH with its session environment imported into the user service manager:
 
 ```sh
 cd ~/.local/share/ha-panel-source

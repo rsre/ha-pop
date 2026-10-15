@@ -13,6 +13,7 @@ for program in chromium curl labwc systemctl swayidle wlopm python3 gsettings; d
     command -v "$program" >/dev/null
 done
 python3 -c 'import gi; gi.require_version("GtkLayerShell", "0.1"); gi.require_foreign("cairo")'
+python3 -c 'import websocket'
 # The keyboard installer replaces its destination; preserve a reused binary first.
 keyboard_copy=$(mktemp)
 trap 'rm -f "$keyboard_copy"' EXIT

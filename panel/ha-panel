@@ -14,6 +14,7 @@ until curl --fail --silent --output /dev/null --connect-timeout 5 --max-time 15 
 done
 
 exec /usr/bin/chromium \
+    --remote-debugging-address=127.0.0.1 --remote-debugging-port=9222 \
     --ozone-platform=wayland \
     --enable-wayland-ime --wayland-text-input-version=3 \
     --user-data-dir="$HOME/.local/share/ha-panel/chromium" \

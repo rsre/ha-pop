@@ -130,3 +130,76 @@ class HealthTests(unittest.TestCase):
             self.assertEqual(remote.load_panel_id(path), first)
             self.assertEqual(len(first), 32)
             self.assertEqual(path.stat().st_mode & 0o777, 0o600)
+
+
+class BrowserTests(unittest.TestCase):
+    def browser(self, handled=False, navigation_error=None):
+        import io,json,tempfile
+        from unittest.mock import Mock
+        folder = tempfile.TemporaryDirectory()
+        self.addCleanup(folder.cleanup)
+        url = Path(folder.name) / 'url'
+        url.write_text('https://example.test/ha-pop-panel/home')
+        ws = Mock()
+        replies = []
+        def send(payload):
+            command = json.loads(payload)
+            result = {'result': {'value': handled}} if command['method'] == 'Runtime.evaluate' else {}
+            if command['method'] == 'Page.navigate' and navigation_error:
+                result = {'errorText': navigation_error}
+            replies.append(json.dumps({'id':command['id'], 'result':result}))
+        ws.send.side_effect = send
+        ws.recv.side_effect = lambda: replies.pop(0)
+        pages = [{'type':'page','webSocketDebuggerUrl':'ws://127.0.0.1:9222/devtools/page/test'}]
+        opener = Mock(side_effect=lambda *a,**k: io.BytesIO(json.dumps(pages).encode()))
+        browser = remote.PanelBrowser(url, open_url=opener, connect=Mock(return_value=ws))
+        return browser,ws
+
+    def test_away_browser_navigates_configured_dashboard_with_fresh_popup_request(self):
+        import json
+        browser,ws = self.browser()
+        browser.show_doorbell()
+        commands = [json.loads(c.args[0]) for c in ws.send.call_args_list]
+        navigation = next(c for c in commands if c['method']=='Page.navigate')
+        self.assertTrue(navigation['params']['url'].startswith('https://example.test/ha-pop-panel/home?ha_pop_doorbell='))
+        ws.close.assert_called_once()
+
+    def test_open_dashboard_handles_repeat_without_navigation(self):
+        import json
+        browser,ws = self.browser(handled=True)
+        browser.show_doorbell()
+        self.assertNotIn('Page.navigate',[json.loads(c.args[0])['method'] for c in ws.send.call_args_list])
+
+    def test_browser_navigation_failure_is_actionable_and_closes_connection(self):
+        browser,ws = self.browser(navigation_error='net::ERR_FAILED')
+        with self.assertRaisesRegex(remote.BrowserError,'dashboard URL'):
+            browser.show_doorbell()
+        ws.close.assert_called_once()
+
+    def test_doorbell_wakes_before_browser_command(self):
+        from unittest.mock import Mock
+        calls=[]
+        browser=Mock()
+        browser.show_doorbell.side_effect=lambda:calls.append('browser')
+        controller=remote.WakeController(run=lambda *a,**k:calls.append('wake'),browser=browser)
+        controller.doorbell()
+        self.assertEqual(calls,['wake','wake','browser'])
+
+
+class DoorbellEndpointTests(unittest.TestCase):
+    def test_doorbell_authentication_and_browser_failure_detail(self):
+        import json
+        from unittest.mock import Mock
+        controller=Mock()
+        controller.doorbell.side_effect=remote.BrowserError('Restart the panel browser.')
+        with HTTPServer(('127.0.0.1',0),remote.handler('test-token',controller)) as server:
+            worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
+            try:
+                for auth,status in [('',401),('Bearer test-token',503)]:
+                    connection=HTTPConnection(*server.server_address)
+                    connection.request('POST','/doorbell',headers={'Authorization':auth})
+                    response=connection.getresponse();self.assertEqual(response.status,status)
+                    body=response.read();connection.close()
+                    if status==401:controller.doorbell.assert_not_called()
+                    else:self.assertEqual(json.loads(body)['error'],'Restart the panel browser.')
+            finally:server.shutdown();worker.join()

@@ -61,6 +61,14 @@ class IntegrationTests(unittest.IsolatedAsyncioTestCase):
             await runtime.execute('doorbell')
         runtime.event_entity.show_doorbell.assert_not_called()
 
+    async def test_reboot_runs_without_emitting_the_doorbell_event(self):
+        runtime = self.entry.runtime_data
+        await runtime.execute('reboot')
+        runtime.client.command.assert_awaited_once_with('reboot')
+        runtime.event_entity.show_doorbell.assert_not_called()
+        with self.assertRaises(ValueError):
+            await runtime.execute('shell')
+
     async def test_parallel_commands_are_serialized(self):
         sequence = []
         async def command(name):

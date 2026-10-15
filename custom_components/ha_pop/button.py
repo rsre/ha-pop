@@ -1,5 +1,6 @@
-"""Wake, sleep, and show-doorbell buttons for normal UI automations."""
-from homeassistant.components.button import ButtonEntity
+"""Panel display controls and device reboot."""
+from homeassistant.components.button import ButtonDeviceClass, ButtonEntity
+from homeassistant.const import EntityCategory
 
 from .entity import device_info
 
@@ -7,6 +8,7 @@ from .entity import device_info
 async def async_setup_entry(hass, entry, async_add_entities):
     async_add_entities([PanelButton(entry, command, icon) for command, icon in [
         ('wake', 'mdi:monitor'), ('sleep', 'mdi:power-sleep'), ('doorbell', 'mdi:doorbell-video'),
+        ('reboot', 'mdi:restart'),
     ]])
 
 
@@ -19,6 +21,9 @@ class PanelButton(ButtonEntity):
         self._attr_unique_id = f'{entry.unique_id}_{command}'
         self._attr_translation_key = command
         self._attr_icon = icon
+        if command == 'reboot':
+            self._attr_device_class = ButtonDeviceClass.RESTART
+            self._attr_entity_category = EntityCategory.CONFIG
         self._attr_device_info = device_info(entry)
 
     async def async_press(self):

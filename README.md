@@ -10,7 +10,7 @@ A Raspberry Pi 7-inch touchscreen display at 720 × 1280 project for Home Assist
 1. Install the [Pi software](panel/README.md).
 2. Add this repository to HACS as an Integration, download HA Pop Panel, and restart Home Assistant.
 3. Add **HA Pop Panel** under Settings → Devices & services. Enter the panel address and shared token, choose the camera, and choose an unused dashboard URL.
-4. Use the integration's Wake, Sleep, and Show doorbell buttons in automations.
+4. Use the integration's Wake, Sleep, and Show doorbell buttons in automations. The Reboot button restarts the Pi and sits under the device's configuration controls.
 
 [CHANGELOG.md](CHANGELOG.md) records changes.
 

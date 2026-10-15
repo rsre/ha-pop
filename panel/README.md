@@ -8,7 +8,7 @@ The panel is a Raspberry Pi 5 running Raspberry Pi OS 64-bit, Debian 13.7 (trixi
 
 The display is mounted in portrait at 720 × 1280, 60 Hz, with touch mapped to `DSI-1`. Chromium opens `https://homeassistant.example/ha-pop-panel/home?ha_pop_kiosk=1` in fullscreen kiosk mode using a persistent Home Assistant session. The [dashboard guide](../custom_components/ha_pop/docs/dashboard.md) covers its sections and popup controls.
 
-The panel uses an [overlay keyboard](docs/keyboard.md), [guarded touch wake](docs/screen-sleep.md), and [Home Assistant wake, sleep, and doorbell commands](../custom_components/ha_pop/README.md). The browser, keyboard, idle handler, and remote command endpoint start through labwc autostart.
+The panel uses an [overlay keyboard](docs/keyboard.md), [guarded touch wake](docs/screen-sleep.md), and [Home Assistant wake, sleep, doorbell, and reboot commands](../custom_components/ha_pop/README.md). The browser, keyboard, idle handler, and remote command endpoint start through labwc autostart.
 
 ## Installed paths
 
@@ -21,8 +21,13 @@ The panel uses an [overlay keyboard](docs/keyboard.md), [guarded touch wake](doc
 | Startup hook | `$HOME/.config/labwc/autostart` |
 | Installer source copy | `$HOME/.local/share/ha-panel-source/panel` |
 | Installer backups | `$HOME/.local/state/ha-panel/backups/` |
+| Reboot request (one line) | `$HOME/.config/ha-panel/reboot-request` |
+| Reboot watcher (root) | `/etc/systemd/system/ha-panel-reboot.path` |
+| Reboot service (root) | `/etc/systemd/system/ha-panel-reboot.service` |
 
 The startup hook retains `/etc/xdg/labwc/autostart`, imports the graphical session environment, and starts the panel services. The browser service restarts Chromium five seconds after it exits. Chromium exposes browser control only on `127.0.0.1:9222`; the authenticated doorbell endpoint uses it to return to the configured dashboard and open video. No arbitrary URL or browser command is accepted over the LAN. The launcher waits for a successful HTTP response before opening Chromium; the desktop can remain visible while Home Assistant or the network is unavailable.
+
+The authenticated `/reboot` command records a request in `$HOME/.config/ha-panel/reboot-request`. A root-owned systemd path unit watches that file and starts a fixed reboot service, which waits three seconds so the HTTP response completes and then reboots. The reboot command exists only in the root-owned unit files; the panel account is never granted sudo access, and repeated presses while a reboot is pending are harmless. Install the units once with `sudo bash panel/install-reboot.sh`.
 
 ## Install or update
 
@@ -43,6 +48,13 @@ bash panel/install.sh https://homeassistant.example/ha-pop-panel/home /path/to/p
 ```
 
 This installs the kiosk, overlay keyboard, guarded sleep, and authenticated command endpoint. It backs up changed files and preserves the shared token. On subsequent runs, omit the keyboard path to reuse the installed patched binary. Start `ha-panel` in the desktop session or reboot after installation. The individual `install-kiosk.sh`, `install-keyboard.sh`, `install-idle.sh`, and `install-remote.sh` scripts support component updates.
+
+The Reboot button needs the fixed root units. Run this as the same desktop account that owns the panel services; it backs up replaced unit files under `/var/backups/ha-panel/` and is safe to re-run: unchanged units are left in place, the script reports that nothing was done, and a disabled or inactive watcher is re-enabled and restarted:
+
+```sh
+cd ~/.local/share/ha-panel-source
+sudo bash panel/install-reboot.sh
+```
 
 After installing the Pi services, install the [Home Assistant integration](../custom_components/ha_pop/README.md) through HACS and enter the token from `~/.config/ha-panel/remote-token` in its UI setup form. Select the integration dashboard URL in the launcher.
 
@@ -94,6 +106,7 @@ Avahi uses `host-name=panel` in `/etc/avahi/avahi-daemon.conf`. After changing t
 - Check recovery from a network outage, including booting while Home Assistant is unavailable.
 - Confirm idle sleep consumes the first wake tap without operating a control.
 - Press the integration Wake, Sleep, and Show doorbell buttons.
+- Confirm `systemctl status ha-panel-reboot.path` shows the watcher active. Press the Reboot button only when restarting the Pi is intended.
 - Confirm SSH remains available.
 
 Run `python3 -m unittest discover -s panel/tests -p 'test_*.py'` from the checkout for the Pi control tests.
@@ -106,6 +119,6 @@ If the panel shows an error page, check its URL, network connection, DNS, clock,
 
 Restart Chromium if page content is displaced. To distinguish a page navigation from a browser service restart, inspect `systemctl --user show ha-panel -p MainPID -p NRestarts` before restarting it. To escape fullscreen locally, attach a keyboard and stop the browser service before closing its window.
 
-To remove the panel setup, remove its labwc autostart block, stop all panel services, and restore startup files from the relevant installer backup. The backup's `previously-absent` file identifies newly created paths. Remove unneeded service files and run `systemctl --user daemon-reload`. Keep the browser profile until its saved session is no longer needed. Remove the Home Assistant integration and its associated automations through the HA UI when they are no longer needed.
+To remove the panel setup, remove its labwc autostart block, stop all panel services, and restore startup files from the relevant installer backup. The backup's `previously-absent` file identifies newly created paths. Remove unneeded service files and run `systemctl --user daemon-reload`. To remove the reboot service, run `sudo systemctl disable --now ha-panel-reboot.path`, remove `/etc/systemd/system/ha-panel-reboot.path` and `ha-panel-reboot.service`, run `sudo systemctl daemon-reload`, and delete `$HOME/.config/ha-panel/reboot-request`; replaced unit files are in the reboot installer backup. Keep the browser profile until its saved session is no longer needed. Remove the Home Assistant integration and its associated automations through the HA UI when they are no longer needed.
 
 Use `sudo poweroff` before disconnecting power. Keep the filesystem writable for the browser profile and configuration. Specific deployment backups and troubleshooting history are listed in [CHANGELOG.md](../CHANGELOG.md).

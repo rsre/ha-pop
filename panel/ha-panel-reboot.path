@@ -1,0 +1,9 @@
+[Unit]
+Description=Home Assistant panel reboot request watcher
+
+[Path]
+# install-reboot.sh replaces this placeholder with the panel account's request file.
+PathChanged=@PANEL_TRIGGER@
+
+[Install]
+WantedBy=multi-user.target

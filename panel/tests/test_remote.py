@@ -115,6 +115,7 @@ class HealthTests(unittest.TestCase):
                     data = response.read()
                     if status == 200:
                         self.assertEqual(json.loads(data)['id'], 'a' * 32)
+                        self.assertEqual(json.loads(data)['version'], remote.VERSION)
                         self.assertNotIn(b'test-token', data)
                     connection.close()
                 self.assertEqual(calls, [])
@@ -203,3 +204,41 @@ class DoorbellEndpointTests(unittest.TestCase):
                     if status==401:controller.doorbell.assert_not_called()
                     else:self.assertEqual(json.loads(body)['error'],'Restart the panel browser.')
             finally:server.shutdown();worker.join()
+
+
+class RebootTests(unittest.TestCase):
+    def test_reboot_records_a_request_without_running_any_command(self):
+        import tempfile
+        calls = []
+        with tempfile.TemporaryDirectory() as folder:
+            request = Path(folder) / 'reboot-request'
+            controller = remote.WakeController(run=lambda args, **kw: calls.append(args), reboot_file=request)
+            controller.reboot()
+            self.assertEqual(calls, [])
+            self.assertTrue(request.read_text().strip())
+
+    def test_missing_reboot_service_is_reported_actionably(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as folder:
+            blocker = Path(folder) / 'blocker'
+            blocker.write_text('not a directory')
+            controller = remote.WakeController(run=lambda *a, **k: None, reboot_file=blocker / 'reboot-request')
+            with self.assertRaisesRegex(remote.RebootError, 'ha-panel-reboot service'):
+                controller.reboot()
+
+    def test_reboot_endpoint_is_authenticated_and_reports_scheduling_failure(self):
+        import json
+        from unittest.mock import Mock
+        controller = Mock()
+        controller.reboot.side_effect = remote.RebootError('Check that the ha-panel-reboot service is installed.')
+        with HTTPServer(('127.0.0.1', 0), remote.handler('test-token', controller)) as server:
+            worker = threading.Thread(target=server.serve_forever, daemon=True); worker.start()
+            try:
+                for auth, status in [('', 401), ('Bearer test-token', 503)]:
+                    connection = HTTPConnection(*server.server_address)
+                    connection.request('POST', '/reboot', headers={'Authorization': auth})
+                    response = connection.getresponse(); self.assertEqual(response.status, status)
+                    body = response.read(); connection.close()
+                    if status == 401: controller.reboot.assert_not_called()
+                    else: self.assertIn('ha-panel-reboot service', json.loads(body)['error'])
+            finally: server.shutdown(); worker.join()

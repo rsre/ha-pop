@@ -22,4 +22,7 @@ bash "$source_dir/install-kiosk.sh" "$url"
 bash "$source_dir/install-keyboard.sh" "$keyboard_copy"
 bash "$source_dir/install-idle.sh" 300
 bash "$source_dir/install-remote.sh"
+if [ ! -e /etc/systemd/system/ha-panel-reboot.path ]; then
+    printf 'To enable the Reboot button, run once: sudo bash panel/install-reboot.sh\n'
+fi
 printf 'Panel installed. Start ha-panel in the desktop session or reboot.\n'

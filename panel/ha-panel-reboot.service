@@ -1,0 +1,10 @@
+[Unit]
+Description=Reboot the panel after a Home Assistant request
+
+[Service]
+Type=oneshot
+# The delay lets the authenticated HTTP response finish before shutdown begins.
+ExecStart=/usr/bin/sleep 3
+ExecStart=/usr/bin/systemctl reboot
+NoNewPrivileges=true
+PrivateTmp=true

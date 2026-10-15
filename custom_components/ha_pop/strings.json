@@ -50,6 +50,9 @@
       },
       "doorbell": {
         "name": "Show doorbell"
+      },
+      "reboot": {
+        "name": "Reboot"
       }
     },
     "event": {

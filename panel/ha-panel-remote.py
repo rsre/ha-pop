@@ -12,9 +12,15 @@ import uuid
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 from urllib.request import urlopen
 
+VERSION = '0.2.3'
+
 
 class BrowserError(Exception):
     """The kiosk browser could not display the doorbell."""
+
+
+class RebootError(Exception):
+    """The Pi could not schedule a reboot."""
 
 
 class PanelBrowser:
@@ -77,12 +83,13 @@ class PanelBrowser:
 
 
 class WakeController:
-    def __init__(self, hold_seconds=300, run=subprocess.run, clock=time.monotonic, browser=None):
+    def __init__(self, hold_seconds=300, run=subprocess.run, clock=time.monotonic, browser=None, reboot_file=None):
         self.hold_seconds = hold_seconds
         self.run = run
         self.clock = clock
         self.deadline = None
         self.browser = browser or PanelBrowser()
+        self.reboot_file = reboot_file or Path.home() / '.config/ha-panel/reboot-request'
 
     def command(self, *args):
         self.run(args, check=True, timeout=15, stdout=subprocess.DEVNULL)
@@ -100,6 +107,14 @@ class WakeController:
     def doorbell(self):
         self.wake()
         self.browser.show_doorbell()
+
+    def reboot(self):
+        try:
+            # A root-owned path unit watches this file and starts the fixed reboot
+            # service. The panel account is never granted sudo access.
+            self.reboot_file.write_text(f'{time.time()}\n')
+        except OSError as error:
+            raise RebootError('Cannot record the Pi reboot request. Check that the ha-panel-reboot service is installed on the panel.') from error
 
     def sleep(self):
         self.resume()
@@ -128,13 +143,13 @@ def handler(token, controller, panel_id='0' * 32):
             elif self.path != '/health':
                 self.reply(404)
             else:
-                self.reply(200, {'id': panel_id, 'version': '0.2.1'})
+                self.reply(200, {'id': panel_id, 'version': VERSION})
 
         def do_POST(self):
             if not self.authorized():
                 self.reply(401)
                 return
-            if self.path not in ('/wake', '/sleep', '/doorbell'):
+            if self.path not in ('/wake', '/sleep', '/doorbell', '/reboot'):
                 self.reply(404)
                 return
             try:
@@ -142,9 +157,11 @@ def handler(token, controller, panel_id='0' * 32):
                     controller.wake()
                 elif self.path == '/doorbell':
                     controller.doorbell()
+                elif self.path == '/reboot':
+                    controller.reboot()
                 else:
                     controller.sleep()
-            except BrowserError as error:
+            except (BrowserError, RebootError) as error:
                 self.reply(503, {'error': str(error)})
                 return
             except (OSError, subprocess.SubprocessError):

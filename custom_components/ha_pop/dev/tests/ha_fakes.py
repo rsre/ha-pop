@@ -70,11 +70,14 @@ def fakes():
     frontend.add_extra_js_url = lambda hass, path: hass.modules.append(path)
     result = {
         'homeassistant': module('homeassistant', config_entries=SimpleNamespace(ConfigFlow=ConfigFlow)),
+        'homeassistant.const': module('const', EntityCategory=SimpleNamespace(CONFIG='config')),
         'homeassistant.components': module('homeassistant.components', frontend=frontend),
         'homeassistant.components.frontend': frontend,
+        'homeassistant.components.button': module('button', ButtonEntity=type('ButtonEntity', (object,), {}), ButtonDeviceClass=SimpleNamespace(RESTART='restart')),
         'homeassistant.components.http': module('http', StaticPathConfig=lambda *a: a),
         'homeassistant.exceptions': module('exceptions', ConfigEntryAuthFailed=type('AuthFailed', (HAError,), {}), ConfigEntryNotReady=type('NotReady', (HAError,), {}), ConfigEntryError=HAError, HomeAssistantError=HAError),
         'homeassistant.helpers': module('helpers'),
+        'homeassistant.helpers.entity': module('entity', DeviceInfo=dict),
         'homeassistant.helpers.aiohttp_client': module('aiohttp_client', async_get_clientsession=lambda hass: hass.session),
         'homeassistant.helpers.config_validation': module('cv', config_entry_only_config_schema=lambda d: d),
         'homeassistant.helpers.selector': module('selector', TextSelector=lambda c: str, TextSelectorConfig=dict, TextSelectorType=SimpleNamespace(PASSWORD='password'), EntitySelector=lambda c: str, EntitySelectorConfig=dict),

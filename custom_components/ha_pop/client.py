@@ -64,6 +64,6 @@ class PanelClient:
         return await self._request('GET', '/health')
 
     async def command(self, command):
-        if command not in ('wake', 'sleep', 'doorbell'):
+        if command not in ('wake', 'sleep', 'doorbell', 'reboot'):
             raise ValueError('Unsupported panel command')
         await self._request('POST', '/' + command)

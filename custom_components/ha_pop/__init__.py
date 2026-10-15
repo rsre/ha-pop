@@ -22,7 +22,7 @@ class PanelRuntime:
     lock: asyncio.Lock = field(default_factory=asyncio.Lock)
 
     async def execute(self, command):
-        if command not in ('wake', 'sleep', 'doorbell'):
+        if command not in ('wake', 'sleep', 'doorbell', 'reboot'):
             raise ValueError('Unsupported command')
         async with self.lock:
             try:

@@ -42,10 +42,11 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         await self.panel.command('wake')
         await self.panel.command('sleep')
         await self.panel.command('doorbell')
-        self.assertEqual([c[:2] for c in self.calls[1:]], [('POST', '/wake'), ('POST', '/sleep'), ('POST', '/doorbell')])
+        await self.panel.command('reboot')
+        self.assertEqual([c[:2] for c in self.calls[1:]], [('POST', '/wake'), ('POST', '/sleep'), ('POST', '/doorbell'), ('POST', '/reboot')])
         with self.assertRaises(ValueError):
             await self.panel.command('shell')
-        self.assertEqual(len(self.calls), 4)
+        self.assertEqual(len(self.calls), 5)
 
     async def test_auth_failure_is_distinct_from_unavailable(self):
         self.status = 401

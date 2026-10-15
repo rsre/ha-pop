@@ -4,7 +4,7 @@ import unittest
 
 from aiohttp import ClientSession, web
 
-spec = importlib.util.spec_from_file_location('panel_client', Path(__file__).parents[2] / 'custom_components/ha_pop/client.py')
+spec = importlib.util.spec_from_file_location('panel_client', Path(__file__).parents[2] / 'client.py')
 client = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(client)
 

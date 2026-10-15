@@ -5,10 +5,9 @@ A Raspberry Pi touchscreen for Home Assistant: a portrait dashboard, large touch
 | Directory | Purpose |
 | --- | --- |
 | [`panel/`](panel/README.md) | Pi launcher, keyboard, sleep guard, remote endpoint, and installer |
-| [`custom_components/ha_pop/`](custom_components/ha_pop) | Home Assistant integration and bundled frontend, installed through HACS |
-| [`homeassistant/`](homeassistant/README.md) | Integration guide, dashboard guide, tests, and release tools |
+| [`custom_components/ha_pop/`](custom_components/ha_pop/README.md) | Home Assistant integration, frontend, guides, and development tools |
 
-The integration is at the repository root under `custom_components/` to follow the [HACS integration layout](https://www.hacs.xyz/docs/publish/integration/). Pi software remains separate.
+The integration is at the repository root under `custom_components/` to follow the [HACS integration layout](https://www.hacs.xyz/docs/publish/integration/). Its guides are in `README.md` and `docs/`; tests and development dependencies are in `dev/`. Pi software remains separate.
 
 1. Install the [Pi software](panel/README.md).
 2. Add this repository to HACS as an Integration, download HA Pop Panel, and restart Home Assistant.
@@ -19,14 +18,13 @@ No SSH access to Home Assistant, Supervisor token, YAML package editing, or Pyth
 
 The default dashboard targets a 7-inch display at 720 × 1280 and uses example entity IDs. Choose real controls through the dashboard UI. Camera video uses Home Assistant's native card; an installed VideoLink card supplies talk controls automatically.
 
-[CHANGELOG.md](CHANGELOG.md) records changes. [PUBLICATION.md](PUBLICATION.md) records the privacy audit and publication steps. Local deployment snapshots are ignored under `.local/` and excluded from release archives.
+[CHANGELOG.md](CHANGELOG.md) records changes.
 
 ## Development checks
 
 ```sh
-python3 -m pip install -r homeassistant/requirements-dev.txt
+python3 -m pip install -r custom_components/ha_pop/dev/requirements-dev.txt
 python3 -m unittest discover -s panel/tests
-python3 -m unittest discover -s homeassistant/tests
-node --test homeassistant/tests/panel.test.cjs
-python3 homeassistant/build_release.py
+python3 -m unittest discover -s custom_components/ha_pop/dev/tests
+node --test custom_components/ha_pop/dev/tests/panel.test.cjs
 ```

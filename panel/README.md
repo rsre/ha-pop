@@ -1,14 +1,14 @@
 # Panel setup and maintenance
 
-This directory contains everything installed on the Raspberry Pi: the Chromium launcher, user services, touch wake guard, remote wake/sleep endpoint, keyboard patches, installers, and tests. The dashboard and Home Assistant configuration live in [homeassistant](../homeassistant/README.md).
+This directory contains everything installed on the Raspberry Pi: the Chromium launcher, user services, touch wake guard, remote wake/sleep endpoint, keyboard patches, installers, and tests. The dashboard and Home Assistant configuration live in [Home Assistant integration](../custom_components/ha_pop/README.md).
 
 ## Configuration
 
 The panel is a Raspberry Pi 5 running Raspberry Pi OS 64-bit, Debian 13.7 (trixie). LightDM automatically logs into labwc as `paneluser`. The hostname is configured in Raspberry Pi OS; Avahi can advertise `panel.local` on the local network.
 
-The display is mounted in portrait at 720 × 1280, 60 Hz, with touch mapped to `DSI-1`. Chromium opens `https://homeassistant.example/ha-pop-panel/home` in fullscreen kiosk mode using a persistent Home Assistant session. The [dashboard guide](../homeassistant/docs/dashboard.md) covers its sections and popup controls.
+The display is mounted in portrait at 720 × 1280, 60 Hz, with touch mapped to `DSI-1`. Chromium opens `https://homeassistant.example/ha-pop-panel/home` in fullscreen kiosk mode using a persistent Home Assistant session. The [dashboard guide](../custom_components/ha_pop/docs/dashboard.md) covers its sections and popup controls.
 
-The panel uses an [overlay keyboard](docs/keyboard.md), [guarded touch wake](docs/screen-sleep.md), and [Home Assistant wake, sleep, and doorbell commands](../homeassistant/README.md). The browser, keyboard, idle handler, and remote command endpoint start through labwc autostart.
+The panel uses an [overlay keyboard](docs/keyboard.md), [guarded touch wake](docs/screen-sleep.md), and [Home Assistant wake, sleep, and doorbell commands](../custom_components/ha_pop/README.md). The browser, keyboard, idle handler, and remote command endpoint start through labwc autostart.
 
 ## Installed paths
 
@@ -44,7 +44,7 @@ bash panel/install.sh https://homeassistant.example/ha-pop-panel/home /path/to/p
 
 This installs the kiosk, overlay keyboard, guarded sleep, and authenticated command endpoint. It backs up changed files and preserves the shared token. On subsequent runs, omit the keyboard path to reuse the installed patched binary. Start `ha-panel` in the desktop session or reboot after installation. The individual `install-kiosk.sh`, `install-keyboard.sh`, `install-idle.sh`, and `install-remote.sh` scripts support component updates.
 
-After installing the Pi services, install the [Home Assistant integration](../homeassistant/README.md) through HACS and enter the token from `~/.config/ha-panel/remote-token` in its UI setup form. Select the integration dashboard URL in the launcher.
+After installing the Pi services, install the [Home Assistant integration](../custom_components/ha_pop/README.md) through HACS and enter the token from `~/.config/ha-panel/remote-token` in its UI setup form. Select the integration dashboard URL in the launcher.
 
 ## Browser and login
 

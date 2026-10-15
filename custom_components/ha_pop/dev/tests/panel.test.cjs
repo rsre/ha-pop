@@ -9,7 +9,7 @@ const context = vm.createContext({
   window: {},
   URL,
 });
-vm.runInContext(fs.readFileSync(require("node:path").join(__dirname, "../../custom_components/ha_pop/frontend/ha-pop-panel.js"), "utf8") + "\nglobalThis.Panel = HaPopPanel;", context);
+vm.runInContext(fs.readFileSync(require("node:path").join(__dirname, "../../frontend/ha-pop-panel.js"), "utf8") + "\nglobalThis.Panel = HaPopPanel;", context);
 
 function panel(overrides = {}) {
   const card = new context.Panel();

@@ -1,6 +1,6 @@
 # Portrait dashboard
 
-The integration creates an editable native Lovelace dashboard at `/<dashboard-path>/home`. Its layout targets a 720 × 1280 portrait display, including Home Assistant's toolbar. The frontend is bundled in [`custom_components/ha_pop/frontend`](../../custom_components/ha_pop/frontend).
+The integration creates an editable native Lovelace dashboard at `/<dashboard-path>/home`. Its layout targets a 720 × 1280 portrait display, including Home Assistant's toolbar. The frontend is bundled in [`custom_components/ha_pop/frontend`](../frontend).
 
 | Section | Interaction |
 | --- | --- |
@@ -17,4 +17,4 @@ Popups close using the close button, Escape, or a tap outside; focus returns to 
 
 The integration supplies the frontend automatically. No dashboard resources or files under `/config/www` need to be maintained. Upgrade it through HACS and reload the panel browser afterward. The saved layout is retained across integration reloads and updates.
 
-The layout checks in [`tests/verify-layout.js`](../tests/verify-layout.js) run in a browser at 720 × 1280 and check overflow, touch target sizes, section boundaries, popup fit, focus, and cleanup. They open details without operating devices. Browser unit tests run with `node --test homeassistant/tests/panel.test.cjs` from the repository root.
+The layout checks in [`tests/verify-layout.js`](../dev/tests/verify-layout.js) run in a browser at 720 × 1280 and check overflow, touch target sizes, section boundaries, popup fit, focus, and cleanup. They open details without operating devices. Browser unit tests run with `node --test custom_components/ha_pop/dev/tests/panel.test.cjs` from the repository root.

@@ -4,7 +4,7 @@
   "codeowners": ["@rsre"],
   "config_flow": true,
   "dependencies": ["frontend", "lovelace"],
-  "documentation": "https://github.com/rsre/ha-pop/blob/main/homeassistant/README.md",
+  "documentation": "https://github.com/rsre/ha-pop/blob/main/custom_components/ha_pop/README.md",
   "integration_type": "device",
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/rsre/ha-pop/issues",

@@ -4,7 +4,7 @@ from pathlib import Path
 import sys
 from types import ModuleType, SimpleNamespace
 
-ROOT = Path(__file__).parents[2] / 'custom_components/ha_pop'
+ROOT = Path(__file__).parents[2]
 
 
 def module(name, **values):

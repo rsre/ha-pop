@@ -18,7 +18,7 @@ labwc starts the idle service after importing the graphical session environment.
 
 The source services, Python guard, and installer are in [`panel`](..). The guard uses the distribution's GTK3 Python bindings, `gir1.2-gtklayershell-0.1`, and `python3-gi-cairo`. Reinstall those dependencies if needed, then run `bash panel/install-idle.sh 300` as the desktop user. The installer backs up existing files and accepts an idle duration in seconds, with a minimum of 10 seconds.
 
-Home Assistant can [wake the screen on command and show the doorbell video](../../homeassistant/README.md). A remote wake temporarily pauses this idle service for a five-minute hold, then restores it.
+Home Assistant can [wake the screen on command and show the doorbell video](../../custom_components/ha_pop/README.md). A remote wake temporarily pauses this idle service for a five-minute hold, then restores it.
 
 ## Adjust or control
 

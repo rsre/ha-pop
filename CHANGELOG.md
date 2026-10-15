@@ -1,8 +1,10 @@
 # Changelog
 
-Project changes and verification history. Deployment addresses, account names, entity mappings, and private backup locations are intentionally excluded from the public record. Current setup is described in the [panel guide](panel/README.md) and [integration guide](homeassistant/README.md).
+Project changes and verification history. Deployment addresses, account names, entity mappings, and private backup locations are intentionally excluded from the public record. Current setup is described in the [panel guide](panel/README.md) and [integration guide](custom_components/ha_pop/README.md).
 
 ## Unreleased — integration 0.2.0
+
+- Consolidated Home Assistant guides and development tools under `custom_components/ha_pop/`, alongside the integration; removed the separate `homeassistant/` directory.
 
 ### Home Assistant integration
 
@@ -13,13 +15,13 @@ Project changes and verification history. Deployment addresses, account names, e
 - Removed the SSH/Supervisor installer workflow in favor of HACS and UI configuration. Existing deployments remain untouched until explicitly migrated.
 - Added native-camera fallback when no video/talk card is installed.
 - Added authenticated Pi health checks and a persistent generated panel ID. Health checks do not wake the screen; existing wake/sleep commands remain compatible.
-- Added release archives, offline client and integration lifecycle checks, and HACS/hassfest CI validation.
+- Added offline client and integration lifecycle checks, and HACS/hassfest CI validation.
 
 ### Repository and publication
 
 - Separated Pi software under `panel/` from Home Assistant support under `homeassistant/`. HACS requires the installable integration itself at repository-root `custom_components/ha_pop/`.
 - Added a complete Pi installer while retaining component installers. Source reorganization does not change installed service names or token files.
-- Added publication auditing and replaced deployment-specific examples with public placeholders. Private local snapshots are ignored and excluded from release exports.
+- Added publication auditing and replaced deployment-specific examples with public placeholders. Private local snapshots are ignored.
 - Sanitized historical deployment details and commit author metadata while preserving the sequence of historical commits. Remote publication is a separate user action.
 
 ## 2026-10-15

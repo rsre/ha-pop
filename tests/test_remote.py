@@ -40,7 +40,7 @@ class RemoteTests(unittest.TestCase):
         controller.tick()
         self.assertIsNone(controller.deadline)
 
-    def test_http_requires_authentication_and_only_exposes_wake(self):
+    def test_http_requires_authentication_and_rejects_unknown_commands(self):
         calls = []
         controller = remote.WakeController(run=lambda args, **kw: calls.append(args))
         with HTTPServer(('127.0.0.1', 0), remote.handler('test-token', controller)) as server:
@@ -57,6 +57,39 @@ class RemoteTests(unittest.TestCase):
                     if expected != 200:
                         self.assertEqual(calls, [])
                 self.assertEqual(len(calls), 2)
+            finally:
+                server.shutdown()
+                worker.join()
+
+    def test_sleep_cancels_wake_hold_and_waits_for_guard(self):
+        now, calls = [0], []
+        controller = remote.WakeController(run=lambda args, **kw: calls.append(args), clock=lambda: now[0])
+        controller.wake()
+        controller.sleep()
+        self.assertIsNone(controller.deadline)
+        self.assertEqual(calls[-2], ('/usr/bin/systemctl', '--user', 'kill', '--kill-whom=main', '--signal=SIGUSR1', 'ha-panel-idle.service'))
+        self.assertEqual(calls[-1], ('/usr/bin/systemctl', '--user', 'start', 'ha-panel-wake-guard.service'))
+        count = len(calls)
+        now[0] = 301
+        controller.tick()
+        self.assertEqual(len(calls), count)
+
+    def test_sleep_endpoint_is_authenticated(self):
+        class Controller:
+            slept = False
+            def sleep(self):
+                self.slept = True
+        controller = Controller()
+        with HTTPServer(('127.0.0.1', 0), remote.handler('test-token', controller)) as server:
+            worker = threading.Thread(target=server.serve_forever, daemon=True)
+            worker.start()
+            try:
+                for auth, status in [('', 401), ('Bearer test-token', 200)]:
+                    connection = HTTPConnection(*server.server_address)
+                    connection.request('POST', '/sleep', headers={'Authorization': auth})
+                    self.assertEqual(connection.getresponse().status, status)
+                    connection.close()
+                    self.assertEqual(controller.slept, status == 200)
             finally:
                 server.shutdown()
                 worker.join()

@@ -29,6 +29,13 @@ class WakeController:
         self.command('/usr/bin/systemctl', '--user', 'start', 'ha-panel-idle.service')
         self.deadline = None
 
+    def sleep(self):
+        self.resume()
+        self.command('/usr/bin/systemctl', '--user', 'stop', 'ha-panel-wake-guard.service')
+        self.command('/usr/bin/systemctl', '--user', 'kill', '--kill-whom=main', '--signal=SIGUSR1', 'ha-panel-idle.service')
+        # Wait for the guard's ready notification, sent after display power-off.
+        self.command('/usr/bin/systemctl', '--user', 'start', 'ha-panel-wake-guard.service')
+
     def tick(self):
         if self.deadline is not None and self.clock() >= self.deadline:
             self.resume()
@@ -44,11 +51,14 @@ def handler(token, controller):
             if not hmac.compare_digest(self.headers.get('Authorization', '').encode(), f'Bearer {token}'.encode()):
                 self.reply(401)
                 return
-            if self.path != '/wake':
+            if self.path not in ('/wake', '/sleep'):
                 self.reply(404)
                 return
             try:
-                controller.wake()
+                if self.path == '/wake':
+                    controller.wake()
+                else:
+                    controller.sleep()
             except (OSError, subprocess.SubprocessError):
                 self.reply(503)
                 return

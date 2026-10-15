@@ -15,6 +15,7 @@ done
 
 exec /usr/bin/chromium \
     --remote-debugging-address=127.0.0.1 --remote-debugging-port=9222 \
+    --disable-features=OverscrollHistoryNavigation,TouchpadOverscrollHistoryNavigation \
     --ozone-platform=wayland \
     --enable-wayland-ime --wayland-text-input-version=3 \
     --user-data-dir="$HOME/.local/share/ha-panel/chromium" \

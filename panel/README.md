@@ -71,7 +71,7 @@ Keep native touchscreen events enabled in `~/.config/labwc/rc.xml`:
 <touch deviceName="10-005d Goodix Capacitive TouchScreen" mapToOutput="DSI-1" mouseEmulation="no"/>
 ```
 
-Native touch events allow Chromium to handle finger scrolling and sliders. Reload labwc after changing its touch configuration. Use Raspberry Pi OS display settings for orientation and verify touch alignment afterward. The [Touch Display 2 documentation](https://www.raspberrypi.com/documentation/accessories/touch-display-2.html) covers wiring, rotation, and keyboard support.
+Native touch events allow Chromium to handle finger scrolling and sliders. The launcher disables Chromium's touchscreen and touchpad overscroll history navigation, preventing horizontal swipes from going back or forward. Reload labwc after changing its touch configuration. Use Raspberry Pi OS display settings for orientation and verify touch alignment afterward. The [Touch Display 2 documentation](https://www.raspberrypi.com/documentation/accessories/touch-display-2.html) covers wiring, rotation, and keyboard support.
 
 ## Local network name
 

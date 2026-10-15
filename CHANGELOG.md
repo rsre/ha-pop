@@ -8,11 +8,13 @@ Project changes and verification history. Deployment addresses, account names, e
 
 ### Home Assistant integration
 
+- Migrated the live panel to the integration and replaced the doorbell automation's wrapper-script call with a direct button action. Removed legacy scripts, YAML REST commands and helper, duplicate dashboard, unused secret, and manually copied frontend. Configuration validation, restart, dashboard rendering, remote sleep/wake, and live doorbell video checks passed. Removed the cleanup backup after verification.
+- Documented direct button actions, and removed the frontend's obsolete input-button default; the integration supplies its event entity automatically.
 - Added a HACS-compatible `custom_components/ha_pop` integration with UI setup and reconfiguration, password-style token entry, stable panel identity, and authenticated connectivity validation.
 - Added native Wake, Sleep, and Show doorbell button entities and an event entity to deliver popup commands only after successful waking.
 - Bundled the frontend and an editable native dashboard. Saved dashboard edits survive integration reloads. Existing dashboards at the requested URL are protected from replacement.
 - Added an importable doorbell automation blueprint. The resulting automation remains editable in the UI.
-- Removed the SSH/Supervisor installer workflow in favor of HACS and UI configuration. Existing deployments remain untouched until explicitly migrated.
+- Removed the SSH/Supervisor installer workflow in favor of HACS and UI configuration.
 - Added native-camera fallback when no video/talk card is installed.
 - Added authenticated Pi health checks and a persistent generated panel ID. Health checks do not wake the screen; existing wake/sleep commands remain compatible.
 - Added offline client and integration lifecycle checks, and HACS/hassfest CI validation.

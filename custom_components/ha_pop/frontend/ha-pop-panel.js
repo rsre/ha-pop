@@ -15,7 +15,6 @@ const HA_POP_ENTITIES = Object.freeze({
   climate: "climate.heating",
   hot_water: "sensor.hot_water_setpoint",
   vacuum: "vacuum.robot",
-  doorbell_command: "input_button.ha_panel_doorbell",
 });
 
 class HaPopPanel extends HTMLElement {

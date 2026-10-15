@@ -82,7 +82,7 @@ test("configuration rejects malformed entity IDs", () => {
 });
 
 test("doorbell commands ignore initial and stale state, and open fresh presses once", () => {
-  const card = panel();
+  const card = panel({ entities: { doorbell_command: "event.wall_panel_doorbell_command" } });
   let opens = 0;
   card._rendered = true;
   card._openPopup = (key) => { assert.equal(key, "camera"); opens++; };

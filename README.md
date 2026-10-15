@@ -1,6 +1,6 @@
 # HA Pop Panel
 
-A Raspberry Pi touchscreen for Home Assistant: a portrait dashboard, large touch targets, camera popups, guarded tap-to-wake, and remote wake/sleep controls.
+A pre-beta Raspberry Pi touchscreen project for Home Assistant: a portrait dashboard, large touch targets, camera popups, guarded tap-to-wake, and remote wake/sleep controls.
 
 | Directory | Purpose |
 | --- | --- |
@@ -14,7 +14,7 @@ The integration is at the repository root under `custom_components/` to follow t
 3. Add **HA Pop Panel** under Settings → Devices & services. Enter the panel address and shared token, choose the camera, and choose an unused dashboard URL.
 4. Use the integration's Wake, Sleep, and Show doorbell buttons in automations.
 
-No SSH access to Home Assistant, Supervisor token, YAML package editing, or Python dependency installation is needed for the integration. Setup uses the Pi's authenticated health endpoint without waking the display. Existing local deployments must update the Pi endpoint to version 0.2.0 first.
+No SSH access to Home Assistant, Supervisor token, YAML package editing, or Python dependency installation is needed for the integration. Setup uses the Pi's authenticated health endpoint without waking the display.
 
 The default dashboard targets a 7-inch display at 720 × 1280 and uses example entity IDs. Choose real controls through the dashboard UI. Camera video uses Home Assistant's native card; an installed VideoLink card supplies talk controls automatically.
 

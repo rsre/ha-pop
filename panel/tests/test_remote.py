@@ -6,7 +6,7 @@ import unittest
 from http.client import HTTPConnection
 from http.server import HTTPServer
 
-spec = importlib.util.spec_from_file_location('remote', Path(__file__).parents[1] / 'kiosk/ha-panel-remote.py')
+spec = importlib.util.spec_from_file_location('remote', Path(__file__).parents[1] / 'ha-panel-remote.py')
 remote = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(remote)
 
@@ -97,3 +97,36 @@ class RemoteTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+class HealthTests(unittest.TestCase):
+    def test_health_authentication_does_not_execute_a_command(self):
+        import json
+        calls = []
+        controller = remote.WakeController(run=lambda args, **kw: calls.append(args))
+        with HTTPServer(('127.0.0.1', 0), remote.handler('test-token', controller, 'a' * 32)) as server:
+            worker = threading.Thread(target=server.serve_forever, daemon=True)
+            worker.start()
+            try:
+                for auth, status in [('', 401), ('Bearer test-token', 200)]:
+                    connection = HTTPConnection(*server.server_address)
+                    connection.request('GET', '/health', headers={'Authorization': auth})
+                    response = connection.getresponse()
+                    self.assertEqual(response.status, status)
+                    data = response.read()
+                    if status == 200:
+                        self.assertEqual(json.loads(data)['id'], 'a' * 32)
+                        self.assertNotIn(b'test-token', data)
+                    connection.close()
+                self.assertEqual(calls, [])
+            finally:
+                server.shutdown()
+                worker.join()
+
+    def test_identity_is_persistent_and_private(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'remote-id'
+            first = remote.load_panel_id(path)
+            self.assertEqual(remote.load_panel_id(path), first)
+            self.assertEqual(len(first), 32)
+            self.assertEqual(path.stat().st_mode & 0o777, 0o600)

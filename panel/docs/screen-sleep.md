@@ -10,15 +10,15 @@ labwc starts the idle service after importing the graphical session environment.
 
 | Item | Path on the Pi |
 | --- | --- |
-| Service | `/home/paneluser/.config/systemd/user/ha-panel-idle.service` |
-| Wake guard service | `/home/paneluser/.config/systemd/user/ha-panel-wake-guard.service` |
-| Wake guard | `/home/paneluser/.local/bin/ha-panel-wake-guard.py` |
-| Timeout | `/home/paneluser/.config/ha-panel/idle.conf` |
-| Startup | `/home/paneluser/.config/labwc/autostart` |
+| Service | `$HOME/.config/systemd/user/ha-panel-idle.service` |
+| Wake guard service | `$HOME/.config/systemd/user/ha-panel-wake-guard.service` |
+| Wake guard | `$HOME/.local/bin/ha-panel-wake-guard.py` |
+| Timeout | `$HOME/.config/ha-panel/idle.conf` |
+| Startup | `$HOME/.config/labwc/autostart` |
 
-The source services, Python guard, and installer are in [`kiosk`](../kiosk). The guard uses the distribution's GTK3 Python bindings, `gir1.2-gtklayershell-0.1`, and `python3-gi-cairo`. Reinstall those dependencies if needed, then run `bash kiosk/install-idle.sh 300` as the desktop user. The installer backs up existing files and accepts an idle duration in seconds, with a minimum of 10 seconds.
+The source services, Python guard, and installer are in [`panel`](..). The guard uses the distribution's GTK3 Python bindings, `gir1.2-gtklayershell-0.1`, and `python3-gi-cairo`. Reinstall those dependencies if needed, then run `bash panel/install-idle.sh 300` as the desktop user. The installer backs up existing files and accepts an idle duration in seconds, with a minimum of 10 seconds.
 
-Home Assistant can [wake the screen on command and show the doorbell video](remote-control.md). A remote wake temporarily pauses this idle service for a five-minute hold, then restores it.
+Home Assistant can [wake the screen on command and show the doorbell video](../../homeassistant/README.md). A remote wake temporarily pauses this idle service for a five-minute hold, then restores it.
 
 ## Adjust or control
 
@@ -37,7 +37,7 @@ systemctl --user stop ha-panel-idle
 systemctl --user start ha-panel-idle
 ```
 
-To permanently return to always-on operation, remove the line `systemctl --user start ha-panel-idle.service` from labwc autostart and stop the service. To restore sleep behavior, rerun the installer.
+To return to always-on operation, remove the line `systemctl --user start ha-panel-idle.service` from labwc autostart and stop the service. To restore sleep behavior, rerun the installer.
 
 The [swayidle documentation](https://github.com/swaywm/swayidle/blob/master/swayidle.1.scd) describes idle timeout/resume events and the immediate-idle signal.
 
@@ -46,7 +46,7 @@ The [swayidle documentation](https://github.com/swaywm/swayidle/blob/master/sway
 The guard logic tests cover held touches, release and quiet time, trailing pointer events, mixed held inputs, and wake notifications without delivered touches:
 
 ```sh
-python3 -m unittest discover -s tests -p 'test_wake_guard.py'
+python3 -m unittest discover -s panel/tests -p 'test_wake_guard.py'
 ```
 
 For a physical check, put the panel to sleep, then tap over a control. The first tap should reveal the dashboard without operating that control.

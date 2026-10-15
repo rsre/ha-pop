@@ -6,6 +6,7 @@ StartLimitIntervalSec=0
 [Service]
 Type=simple
 Environment=HA_PANEL_REMOTE_TOKEN_FILE=%h/.config/ha-panel/remote-token
+EnvironmentFile=-%h/.config/ha-panel/remote.conf
 ExecStart=/usr/bin/python3 %h/.local/bin/ha-panel-remote.py
 ExecStopPost=/usr/bin/systemctl --user start ha-panel-idle.service
 Restart=always

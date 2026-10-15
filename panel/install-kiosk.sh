@@ -1,7 +1,7 @@
 #!/bin/bash
 # Run as the desktop user on Raspberry Pi OS with labwc.
 set -euo pipefail
-url=${1:?Usage: bash kiosk/install.sh https://your-home-assistant/}
+url=${1:?Usage: bash panel/install-kiosk.sh https://your-home-assistant/}
 case "$url" in
     http://*|https://*) ;;
     *) echo 'URL must use HTTP or HTTPS' >&2; exit 1 ;;

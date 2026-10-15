@@ -3,7 +3,7 @@ from pathlib import Path
 import unittest
 
 
-spec = importlib.util.spec_from_file_location("wake_guard", Path(__file__).parents[1] / "kiosk/ha-panel-wake-guard.py")
+spec = importlib.util.spec_from_file_location("wake_guard", Path(__file__).parents[1] / "ha-panel-wake-guard.py")
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 

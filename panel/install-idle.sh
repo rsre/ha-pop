@@ -2,7 +2,7 @@
 set -euo pipefail
 seconds=${1:-300}
 if ! [[ "$seconds" =~ ^[0-9]+$ ]] || (( 10#$seconds < 10 )); then
-    echo 'Usage: bash kiosk/install-idle.sh [idle-seconds, at least 10]' >&2
+    echo 'Usage: bash panel/install-idle.sh [idle-seconds, at least 10]' >&2
     exit 1
 fi
 for program in swayidle wlopm python3; do command -v "$program" >/dev/null; done

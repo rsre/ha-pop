@@ -1,7 +1,7 @@
 #!/bin/bash
 # Install the separately built overlay keyboard for the desktop account.
 set -euo pipefail
-binary=${1:?Usage: bash kiosk/install-keyboard.sh /path/to/patched/squeekboard}
+binary=${1:?Usage: bash panel/install-keyboard.sh /path/to/patched/squeekboard}
 test -x "$binary"
 source_dir=$(cd -- "$(dirname -- "$0")" && pwd)
 autostart="$HOME/.config/labwc/autostart"

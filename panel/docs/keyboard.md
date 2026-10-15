@@ -4,14 +4,14 @@ The panel uses Squeekboard. Chromium needs `--enable-wayland-ime --wayland-text-
 
 The Raspberry Pi keyboard package requests the `TOP` display layer, which labwc puts below fullscreen Chromium. Its D-Bus `Visible` property can be true while the keyboard is hidden behind the browser. This is reported in [Raspberry Pi's keyboard repository](https://github.com/raspberrypi-ui/squeekboard/issues/13) and is visible in the [panel source](https://github.com/raspberrypi-ui/squeekboard/blob/master/src/panel.c).
 
-The repository's [patch](../kiosk/squeekboard-overlay.patch) changes the requested layer to `OVERLAY`. A dedicated user service runs that compiled keyboard instead of the stock desktop autostart entry. The distribution's keyboard binary is preserved. This setup is intended for this dedicated panel: the overlay keyboard can also draw above other fullscreen surfaces.
+The repository's [patch](../../panel/squeekboard-overlay.patch) changes the requested layer to `OVERLAY`. A dedicated user service runs that compiled keyboard instead of the stock desktop autostart entry. The distribution's keyboard binary is preserved. This setup is intended for this dedicated panel: the overlay keyboard can also draw above other fullscreen surfaces.
 
 | Purpose | Path on the Pi |
 | --- | --- |
-| Keyboard binary | `/home/paneluser/.local/lib/ha-panel/squeekboard` |
-| User service | `/home/paneluser/.config/systemd/user/ha-panel-keyboard.service` |
-| Stock startup override | `/home/paneluser/.config/autostart/squeekboard.desktop` |
-| Source and logs | `/home/paneluser/ha-panel-keyboard-build` |
+| Keyboard binary | `$HOME/.local/lib/ha-panel/squeekboard` |
+| User service | `$HOME/.config/systemd/user/ha-panel-keyboard.service` |
+| Stock startup override | `$HOME/.config/autostart/squeekboard.desktop` |
+| Source and logs | `$HOME/ha-panel-keyboard-build` |
 
 ## Rebuild
 
@@ -42,10 +42,10 @@ Then unpack, patch, compile, and run the package's tests:
 ```sh
 dpkg-source -x squeekboard_1.43.1-1+rpt1.dsc patched-squeekboard
 cd patched-squeekboard
-patch -p1 < /home/paneluser/.local/share/ha-panel-source/kiosk/squeekboard-overlay.patch
-patch -p1 < /home/paneluser/.local/share/ha-panel-source/kiosk/squeekboard-test-fixture.patch
+patch -p1 < $HOME/.local/share/ha-panel-source/panel/squeekboard-overlay.patch
+patch -p1 < $HOME/.local/share/ha-panel-source/panel/squeekboard-test-fixture.patch
 dpkg-buildpackage -b -us -uc -j2
-bash /home/paneluser/.local/share/ha-panel-source/kiosk/install-keyboard.sh "$PWD/_build/src/squeekboard"
+bash $HOME/.local/share/ha-panel-source/panel/install-keyboard.sh "$PWD/_build/src/squeekboard"
 ```
 
 Do not install the generated `.deb` files: only the compiled binary is copied into the panel's private installation. Keep the source and build logs for maintenance. Rebuild when relevant keyboard or library updates require it; distribution keyboard updates do not update this separate copy.

@@ -13,11 +13,14 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         self.calls = []
         self.status = 200
-        self.payload = {'id': 'a' * 32, 'version': '0.2.0'}
+        self.payload = {'id': 'a' * 32, 'version': '0.2.1'}
+        self.command_error = None
         async def handle(request):
             self.calls.append((request.method, request.path, request.headers.get('Authorization')))
             if request.path == '/health':
                 return web.json_response(self.payload, status=self.status)
+            if self.command_error is not None:
+                return web.json_response({'error': self.command_error}, status=self.status)
             return web.Response(status=self.status)
         app = web.Application()
         app.router.add_route('*', '/{path:.*}', handle)
@@ -38,10 +41,11 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.calls[0][:2], ('GET', '/health'))
         await self.panel.command('wake')
         await self.panel.command('sleep')
-        self.assertEqual([c[:2] for c in self.calls[1:]], [('POST', '/wake'), ('POST', '/sleep')])
+        await self.panel.command('doorbell')
+        self.assertEqual([c[:2] for c in self.calls[1:]], [('POST', '/wake'), ('POST', '/sleep'), ('POST', '/doorbell')])
         with self.assertRaises(ValueError):
             await self.panel.command('shell')
-        self.assertEqual(len(self.calls), 3)
+        self.assertEqual(len(self.calls), 4)
 
     async def test_auth_failure_is_distinct_from_unavailable(self):
         self.status = 401
@@ -50,6 +54,12 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         self.status = 503
         with self.assertRaises(client.CannotConnect):
             await self.panel.command('wake')
+
+    async def test_browser_error_is_preserved_for_actionable_feedback(self):
+        self.status = 503
+        self.command_error = 'Restart the panel browser.'
+        with self.assertRaisesRegex(client.CannotConnect, 'Restart the panel browser'):
+            await self.panel.command('doorbell')
 
     async def test_malformed_health_is_rejected(self):
         self.payload = {'token': 'not-an-identity'}

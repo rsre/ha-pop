@@ -1,6 +1,6 @@
 """Constants for the panel integration."""
 DOMAIN = 'ha_pop'
-VERSION = '0.2.0'
+VERSION = '0.2.1'
 STATIC_URL = '/ha_pop_static'
 MODULE_URL = f'{STATIC_URL}/ha-pop-panel.js?v={VERSION}'
 DEFAULT_PORT = 8765

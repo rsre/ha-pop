@@ -2,7 +2,13 @@
 
 Project changes and verification history. Deployment addresses, account names, entity mappings, and private backup locations are intentionally excluded from the public record. Current setup is described in the [panel guide](panel/README.md) and [integration guide](custom_components/ha_pop/README.md).
 
-## Unreleased — integration 0.2.0
+## Unreleased — integration 0.2.1
+
+- Fixed Show doorbell while the kiosk is on another page: wake the display, return to its configured dashboard, and open live video. Repeated requests retain an already-open stream. Browser control listens only on loopback.
+- Added specific connection, authentication, display-power, and browser-control errors.
+- Added a frontend loader that waits for HA startup and retained pending camera requests across initial card replacement. Explicit dismissal stops replay. Verified return from another dashboard, live video, and repeated-ring stream preservation on the physical panel; 42 automated tests pass.
+
+## Integration 0.2.0
 
 - Consolidated Home Assistant guides and development tools under `custom_components/ha_pop/`, alongside the integration; removed the separate `homeassistant/` directory.
 

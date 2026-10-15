@@ -43,19 +43,27 @@ class PanelClient:
                     if response.status in (401, 403):
                         raise InvalidAuth('Panel authentication failed')
                     if response.status != 200:
-                        raise CannotConnect('Panel command failed')
+                        try:
+                            detail = (await response.json()).get('error', '')
+                        except (ValueError, aiohttp.ClientError, AttributeError):
+                            detail = ''
+                        if not isinstance(detail, str):
+                            detail = ''
+                        raise CannotConnect(detail[:300] or f'Panel returned HTTP {response.status} for {path}')
                     if method == 'GET':
                         result = await response.json()
                         if not isinstance(result, dict) or not re.fullmatch(r'[a-f0-9]{32}', str(result.get('id', ''))):
                             raise CannotConnect('Panel health response is invalid')
                         return result
-        except (aiohttp.ClientError, TimeoutError, ValueError) as error:
-            raise CannotConnect('Panel request failed') from error
+        except TimeoutError as error:
+            raise CannotConnect(f'Timed out contacting {self._base}. Check the panel network and services.') from error
+        except (aiohttp.ClientError, ValueError) as error:
+            raise CannotConnect(f'Cannot reach {self._base}. Check the address and hostname resolution; try the panel IP address.') from error
 
     async def health(self):
         return await self._request('GET', '/health')
 
     async def command(self, command):
-        if command not in ('wake', 'sleep'):
+        if command not in ('wake', 'sleep', 'doorbell'):
             raise ValueError('Unsupported panel command')
         await self._request('POST', '/' + command)

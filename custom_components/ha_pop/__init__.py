@@ -26,9 +26,11 @@ class PanelRuntime:
             raise ValueError('Unsupported command')
         async with self.lock:
             try:
-                await self.client.command('wake' if command == 'doorbell' else command)
-            except (CannotConnect, InvalidAuth) as error:
-                raise HomeAssistantError('The panel could not complete the command. Check its connection and shared token.') from error
+                await self.client.command(command)
+            except InvalidAuth as error:
+                raise HomeAssistantError('The panel rejected its token. Reconfigure HA Pop Panel with the token stored on the Pi.') from error
+            except CannotConnect as error:
+                raise HomeAssistantError(str(error) or 'The panel is unreachable. Check its configured address and network connection.') from error
             if command == 'doorbell':
                 if self.event_entity is None:
                     raise HomeAssistantError('The panel command entity is not ready')

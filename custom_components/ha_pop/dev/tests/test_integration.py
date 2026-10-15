@@ -44,12 +44,22 @@ class IntegrationTests(unittest.IsolatedAsyncioTestCase):
     async def test_doorbell_is_emitted_only_after_successful_wake(self):
         runtime = self.entry.runtime_data
         await runtime.execute('doorbell')
-        runtime.client.command.assert_awaited_once_with('wake')
+        runtime.client.command.assert_awaited_once_with('doorbell')
         runtime.event_entity.show_doorbell.assert_called_once()
         runtime.client.command.side_effect = self.client.CannotConnect()
         with self.assertRaises(HAError):
             await runtime.execute('doorbell')
         runtime.event_entity.show_doorbell.assert_called_once()
+
+    async def test_command_errors_distinguish_token_from_browser_failure(self):
+        runtime = self.entry.runtime_data
+        runtime.client.command.side_effect = self.client.InvalidAuth()
+        with self.assertRaisesRegex(HAError, 'rejected its token'):
+            await runtime.execute('doorbell')
+        runtime.client.command.side_effect = self.client.CannotConnect('Restart the panel browser.')
+        with self.assertRaisesRegex(HAError, 'Restart the panel browser'):
+            await runtime.execute('doorbell')
+        runtime.event_entity.show_doorbell.assert_not_called()
 
     async def test_parallel_commands_are_serialized(self):
         sequence = []

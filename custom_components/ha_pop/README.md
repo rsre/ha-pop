@@ -24,7 +24,7 @@ The integration creates three button entities on the panel device:
 | --- | --- |
 | Wake | Wake the screen and hold it awake for at least five minutes |
 | Sleep | Cancel the wake hold and sleep immediately, retaining guarded touch wake |
-| Show doorbell | Wake, then open the selected camera in the panel dashboard |
+| Show doorbell | Wake, return to the panel dashboard, and open its selected camera |
 
 Use `button.press` with the appropriate entity in the automation editor. Entity IDs depend on the configured device name and can be renamed through HA. They are not hardcoded in the integration.
 
@@ -47,7 +47,9 @@ https://github.com/rsre/ha-pop/blob/main/custom_components/ha_pop/blueprints/doo
 
 Create an automation from it, choose the doorbell event entity, ring event type, and the panel's **Show doorbell** button. The resulting automation is editable through the normal UI. Binary-sensor doorbells can use a normal state-triggered UI automation that presses the same button.
 
-Popup commands travel through the integration event entity and the browser's existing HA connection. They are emitted only after waking succeeds. The dashboard must be connected to receive them; initial state and requests older than 30 seconds are ignored. Repeated rings keep an already-open video card intact. Talk requires an explicit user action. The popup remains open until dismissed.
+Show doorbell calls the Pi's authenticated `/doorbell` endpoint. It wakes the display and uses local browser control to return to the URL configured on the Pi, even if another dashboard or page is open. The dashboard consumes a fresh popup request once it is ready. Repeated rings keep an already-open video card intact. The integration also records a popup event after the Pi accepts the command. Talk requires an explicit user action. The popup remains open until dismissed.
+
+Connection errors identify the configured panel address and suggest checking hostname resolution. If HA cannot resolve the Pi's hostname, use its LAN IP in Reconfigure. Authentication errors request the panel token; browser errors identify the kiosk service or dashboard URL to check.
 
 ## Dashboard and updates
 

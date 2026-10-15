@@ -18,11 +18,13 @@ The snapshot refreshes every 30 seconds. Continuous video and audio are created 
 
 Popups close with their large close button, Escape, or a tap outside. Focus returns to the triggering control. Native Home Assistant detail dialogs can take over after the panel's own dialog closes. Missing or unavailable light entities, offline connections, and pending commands disable their controls. Errors appear in the footer. Opening a popup does not operate the device; service calls require interaction with its controls.
 
+Home Assistant can also [wake the screen and open the camera popup](remote-control.md) through the doorbell command helper.
+
 The hot-water popup displays the existing `sensor.hot_water_setpoint`; this sensor is read-only. The dashboard does not invent a writable temperature control that the existing setup lacks.
 
 ## Source and installation
 
-- [`frontend/ha-pop-panel.js`](../frontend/ha-pop-panel.js): custom Home Assistant card, version **0.1.1**.
+- [`frontend/ha-pop-panel.js`](../frontend/ha-pop-panel.js): custom Home Assistant card, version **0.1.2**.
 - [`dashboards/example-panel.yaml`](../dashboards/example-panel.yaml): dashboard source and entity mappings.
 - [`tools/install_dashboard.py`](../tools/install_dashboard.py): authenticated management API installer.
 
@@ -32,7 +34,7 @@ Installed server files and registrations:
 | --- | --- |
 | SSH access | `homeassistant-local` |
 | Frontend file | `/config/www/ha-pop/ha-pop-panel.js` |
-| JavaScript module resource | `/local/ha-pop/ha-pop-panel.js?v=0.1.1` |
+| JavaScript module resource | `/local/ha-pop/ha-pop-panel.js?v=0.1.2` |
 | Storage dashboard | `dashboard-panel`, titled “Panel”, visible to regular users |
 | Dashboard URL | `/dashboard-panel/casa` |
 | Initial registration backup | `/config/ha-pop-backups/20261015T140457-825387` |
@@ -86,7 +88,7 @@ On 2026-10-15, tested the installed dashboard in Chromium on the physical Pi:
 - All seven popups load their actual native cards without error cards, fit on screen without scrolling, release their cards on close, and restore focus.
 - Rapidly replacing the camera popup with the coffee popup retains the new popup's content.
 - Native Home Assistant more-info events release the panel modal before opening the native dialog.
-- Six unit tests cover correct entity/service selection, unavailable and offline behavior, duplicate-tap suppression, failure feedback, popup configuration, and entity validation.
+- Seven unit tests cover correct entity/service selection, unavailable and offline behavior, duplicate-tap suppression, failure feedback, popup configuration, entity validation, and fresh doorbell command handling.
 
 The live layout checks are in [`tests/verify-layout.js`](../tests/verify-layout.js), evaluated in the panel's browser at the physical viewport. They open and close details without sending device commands. No device actions were executed by the validation suite. Temporary diagnostics were removed; both kiosk services are active, the saved boot URL targets the new dashboard, and a screenshot after normal browser startup confirmed it loads correctly with the existing login. A full reboot after selecting the new dashboard has not been performed.
 

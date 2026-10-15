@@ -11,6 +11,7 @@ A dedicated touchscreen controller for Home Assistant. Powering on the panel sho
 | Home Assistant | `https://homeassistant.example/` |
 | Touchscreen dashboard | [`Panel`](https://homeassistant.example/dashboard-panel/casa), portrait 720 × 1280 |
 | Screen sleep | After 5 minutes idle; first tap wakes without operating controls |
+| Doorbell | Home Assistant wakes the panel and opens the Portón video popup |
 | Operating system | Raspberry Pi OS 64-bit, Debian 13.7 (trixie), image 2026-10-06 |
 | Hostname / desktop user | `panel` / `paneluser` |
 | Deployment status | Dedicated no-scroll dashboard installed; screen fit and seven popups verified |
@@ -20,6 +21,8 @@ The Pi is a browser client. Home Assistant continues running on its existing ser
 SSH: `ssh paneluser@192.0.2.10 -i ~/.ssh/homeassistant`.
 
 The [touchscreen dashboard guide](docs/dashboard.md) covers its sections, popup controls, source, deployment, tests, and rollback.
+
+The [remote control guide](docs/remote-control.md) covers Home Assistant wake commands and the doorbell video automation.
 
 The [screen sleep guide](docs/screen-sleep.md) covers idle display power-off and touch wake.
 

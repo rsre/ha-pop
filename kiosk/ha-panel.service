@@ -1,0 +1,13 @@
+[Unit]
+Description=Home Assistant touchscreen kiosk
+PartOf=graphical-session.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/ha-panel
+Restart=always
+RestartSec=5
+TimeoutStopSec=20
+KillMode=control-group
+UMask=0077

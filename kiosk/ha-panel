@@ -1,0 +1,23 @@
+#!/bin/bash
+set -euo pipefail
+
+IFS= read -r url < "$HOME/.config/ha-panel/url"
+case "$url" in
+    http://*|https://*) ;;
+    *) echo 'Panel URL must use HTTP or HTTPS' >&2; exit 1 ;;
+esac
+
+# Wait through network/server startup instead of leaving an error page onscreen.
+until curl --fail --silent --output /dev/null --connect-timeout 5 --max-time 15 "$url"; do
+    echo 'Waiting for Home Assistant to respond...'
+    sleep 5
+done
+
+exec /usr/bin/chromium \
+    --ozone-platform=wayland \
+    --enable-wayland-ime --wayland-text-input-version=3 \
+    --user-data-dir="$HOME/.local/share/ha-panel/chromium" \
+    --password-store=basic \
+    --kiosk --no-first-run --no-default-browser-check \
+    --noerrdialogs --disable-session-crashed-bubble \
+    "$url"

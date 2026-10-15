@@ -1,0 +1,30 @@
+# Home Assistant panel
+
+A dedicated touchscreen controller for Home Assistant. Powering on the panel should open the control dashboard in fullscreen Chromium, with no desktop interaction required.
+
+| Component | Details |
+| --- | --- |
+| Computer | Raspberry Pi 5 |
+| Display | Raspberry Pi Touch Display 2, 7-inch |
+| Storage | 64 GB microSD |
+| Panel address | `192.0.2.10` |
+| Home Assistant | `https://homeassistant.example/` |
+| Touchscreen dashboard | [`Panel`](https://homeassistant.example/dashboard-panel/casa), portrait 720 × 1280 |
+| Screen sleep | After 5 minutes idle; first tap wakes without operating controls |
+| Operating system | Raspberry Pi OS 64-bit, Debian 13.7 (trixie), image 2026-10-06 |
+| Hostname / desktop user | `panel` / `paneluser` |
+| Deployment status | Dedicated no-scroll dashboard installed; screen fit and seven popups verified |
+
+The Pi is a browser client. Home Assistant continues running on its existing server.
+
+SSH: `ssh paneluser@192.0.2.10 -i ~/.ssh/homeassistant`.
+
+The [touchscreen dashboard guide](docs/dashboard.md) covers its sections, popup controls, source, deployment, tests, and rollback.
+
+The [screen sleep guide](docs/screen-sleep.md) covers idle display power-off and touch wake.
+
+See [setup and maintenance](docs/panel-setup.md) for the installation plan, acceptance checks, and recovery procedure. No passwords, private keys, or browser profiles belong in this repository.
+
+The [touchscreen keyboard notes](docs/keyboard.md) cover Chromium input support and the keyboard layer fix required for fullscreen use.
+
+The [Home camera layout notes](docs/example-camera.md) describe the deployed and verified automatic-height fix in VideoLink 0.12.59.

@@ -1,4 +1,4 @@
-const HA_POP_VERSION = "0.1.1";
+const HA_POP_VERSION = "0.1.2";
 
 const HA_POP_ENTITIES = Object.freeze({
   kitchen_1: "switch.kitchen_light_1",
@@ -15,6 +15,7 @@ const HA_POP_ENTITIES = Object.freeze({
   climate: "climate.heating",
   hot_water: "sensor.hot_water_setpoint",
   vacuum: "vacuum.robot",
+  doorbell_command: "input_button.ha_panel_doorbell",
 });
 
 class HaPopPanel extends HTMLElement {
@@ -43,9 +44,23 @@ class HaPopPanel extends HTMLElement {
     this._hass = hass;
     if (this._rendered) this._update();
     for (const card of this._popupCards) card.hass = hass;
+    this._handleDoorbellCommand();
   }
 
   get hass() { return this._hass; }
+
+  _handleDoorbellCommand() {
+    const stamp = this._state("doorbell_command")?.state;
+    const previous = this._doorbellStamp;
+    this._doorbellStamp = stamp;
+    // Establish a baseline on initial connection; never replay an old press.
+    if (!previous || stamp === previous || !this._rendered) return;
+    const age = Date.now() - Date.parse(stamp);
+    if (!Number.isFinite(age) || age < -5000 || age > 30000) return;
+    const dialog = this.shadowRoot.querySelector("dialog");
+    if (dialog?.open && this._activePopup === "camera") return;
+    this._openPopup("camera", this.shadowRoot.querySelector('[data-popup="camera"]'));
+  }
   getCardSize() { return 16; }
   getGridOptions() { return { rows: "auto", columns: "full" }; }
 
@@ -257,6 +272,7 @@ class HaPopPanel extends HTMLElement {
     const body = this.shadowRoot.querySelector(".popup-body");
     body.textContent = "Cargando…";
     dialog.showModal();
+    this._activePopup = key;
     this.shadowRoot.querySelector(".close").focus();
     try {
       const helpers = await window.loadCardHelpers();
@@ -274,6 +290,7 @@ class HaPopPanel extends HTMLElement {
   }
 
   _clearPopup() {
+    this._activePopup = undefined;
     ++this._generation;
     this._popupCards = [];
     this.shadowRoot.querySelector(".popup-body")?.replaceChildren();

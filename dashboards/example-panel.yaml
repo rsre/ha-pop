@@ -21,6 +21,7 @@ views:
           climate: climate.heating
           hot_water: sensor.hot_water_setpoint
           vacuum: vacuum.robot
+          doorbell_command: input_button.ha_panel_doorbell
         camera_card:
           video_fit: contain
           talk_mode: native

@@ -80,3 +80,24 @@ test("opening details uses the existing entities without actions on open", () =>
 test("configuration rejects malformed entity IDs", () => {
   assert.throws(() => panel({ entities: { camera: '<img src=x onerror="alert(1)">' } }), /Invalid entity/);
 });
+
+test("doorbell commands ignore initial and stale state, and open fresh presses once", () => {
+  const card = panel();
+  let opens = 0;
+  card._rendered = true;
+  card._openPopup = (key) => { assert.equal(key, "camera"); opens++; };
+  card.shadowRoot.querySelector = () => ({ open: false });
+  const set = (stamp) => { card.hass = { states: { [card._entities.doorbell_command]: { state: stamp } } }; };
+  set(new Date().toISOString());
+  assert.equal(opens, 0);
+  set(new Date(Date.now() - 60000).toISOString());
+  assert.equal(opens, 0);
+  const fresh = new Date().toISOString();
+  set(fresh);
+  set(fresh);
+  assert.equal(opens, 1);
+  card._activePopup = "camera";
+  card.shadowRoot.querySelector = () => ({ open: true });
+  set(new Date(Date.now() + 100).toISOString());
+  assert.equal(opens, 1);
+});

@@ -1,0 +1,26 @@
+title: Home
+views:
+  - title: Casa
+    path: casa
+    type: panel
+    cards:
+      - type: custom:ha-pop-panel
+        title: Home
+        entities:
+          kitchen_1: switch.kitchen_light_1
+          kitchen_2: switch.kitchen_light_2
+          coffee: switch.coffee_maker
+          coffee_schedule: input_boolean.coffee_schedule
+          coffee_time: input_datetime.coffee_time
+          nave: switch.garage_lights
+          spotlight: switch.spotlight
+          exterior: switch.exterior_lights
+          camera: camera.doorbell
+          washer: sensor.washer_status
+          dryer: sensor.dryer_status
+          climate: climate.heating
+          hot_water: sensor.hot_water_setpoint
+          vacuum: vacuum.robot
+        camera_card:
+          video_fit: contain
+          talk_mode: native

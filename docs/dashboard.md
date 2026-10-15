@@ -1,6 +1,6 @@
 # Portrait touchscreen dashboard
 
-The installed dashboard is [Panel](https://homeassistant.example/dashboard-panel/casa). The Pi's kiosk URL now points directly to it. The original Home dashboard remains available.
+The installed dashboard is [Panel](https://homeassistant.example/dashboard-panel/casa). The Pi's kiosk URL points directly to it.
 
 The layout targets the mounted 7-inch screen at **720 × 1280**, including Home Assistant's 56-pixel toolbar. The main card uses the remaining 1224 pixels. Its sections have fixed row allocations and explicit typography so inherited theme line heights cannot push controls into the next section.
 
@@ -37,11 +37,8 @@ Installed server files and registrations:
 | JavaScript module resource | `/local/ha-pop/ha-pop-panel.js?v=0.1.2` |
 | Storage dashboard | `dashboard-panel`, titled “Panel”, visible to regular users |
 | Dashboard URL | `/dashboard-panel/casa` |
-| Initial registration backup | `/config/ha-pop-backups/20261015T140457-825387` |
-| Final deployment backup | `/config/ha-pop-backups/20261015T140811-892863` |
-| Previous Pi URL | `/home/paneluser/.local/state/ha-panel/backups/dashboard-20261015T140524/url` |
 
-The installer copies the frontend atomically, registers its resource through the WebSocket API, creates the dashboard if absent, saves its configuration, and reads it back to verify equality. It backs up existing registrations, configuration, and frontend before changes. It does not edit `.storage` files or `configuration.yaml` directly and requires no Core restart. Installation used the SSH add-on's existing Supervisor authentication; no credentials are stored in this repository.
+The installer copies the frontend atomically, registers its resource through the WebSocket API, creates the dashboard if absent, saves its configuration, and reads it back to verify equality. It backs up existing registrations, configuration, and frontend before changes. It does not edit `.storage` files or `configuration.yaml` directly and requires no Core restart. The installer uses the SSH add-on's Supervisor authentication; no credentials are stored in this repository.
 
 ## Update
 
@@ -53,7 +50,7 @@ node --test tests/panel.test.cjs
 git diff --check
 ```
 
-For the initial deployment, a pure-Python `websocket-client` package was copied into `/tmp/ha-pop-deploy` on the server, and the SSH add-on already provided PyYAML. Recreate that temporary dependency if the add-on has restarted; the installer accepts it via `PYTHONPATH`. The dependency is used only for installation, not by the running dashboard:
+The installer requires PyYAML and `websocket-client`. The SSH add-on provides PyYAML; make the pure-Python WebSocket client available in `/tmp/ha-pop-deploy` via `PYTHONPATH`. This dependency is used only for installation, not by the running dashboard:
 
 ```sh
 ssh -i ~/.ssh/homeassistant paneluser@192.0.2.10 'tar -cf - -C /usr/lib/python3/dist-packages websocket' |
@@ -77,28 +74,12 @@ wlrctl toplevel focus app_id:chromium
 wlrctl keyboard type r modifiers CTRL,SHIFT
 ```
 
-## Validation
+## Checks
 
-On 2026-10-15, tested the installed dashboard in Chromium on the physical Pi:
+Run `node --test tests/panel.test.cjs` for control behavior and doorbell command handling. Evaluate [`tests/verify-layout.js`](../tests/verify-layout.js) in the panel browser at 720 × 1280 to check page overflow, section boundaries, touch target sizes, popup layout, cleanup, and focus return. These layout checks open details without sending device commands.
 
-- Page dimensions are exactly **720 × 1280**, with no horizontal or vertical document overflow.
-- The card occupies **720 × 1224** below the toolbar.
-- All 12 primary touch targets are at least 44 pixels and remain within the screen.
-- Lighting and machine controls stay inside their section boundaries.
-- All seven popups load their actual native cards without error cards, fit on screen without scrolling, release their cards on close, and restore focus.
-- Rapidly replacing the camera popup with the coffee popup retains the new popup's content.
-- Native Home Assistant more-info events release the panel modal before opening the native dialog.
-- Seven unit tests cover correct entity/service selection, unavailable and offline behavior, duplicate-tap suppression, failure feedback, popup configuration, entity validation, and fresh doorbell command handling.
+## Recovery
 
-The live layout checks are in [`tests/verify-layout.js`](../tests/verify-layout.js), evaluated in the panel's browser at the physical viewport. They open and close details without sending device commands. No device actions were executed by the validation suite. Temporary diagnostics were removed; both kiosk services are active, the saved boot URL targets the new dashboard, and a screenshot after normal browser startup confirmed it loads correctly with the existing login. A full reboot after selecting the new dashboard has not been performed.
+To select another dashboard, put its URL in `~/.config/ha-panel/url` and restart `ha-panel`. The original Home dashboard is available at `https://homeassistant.example/dashboard-example/0`.
 
-## Roll back
-
-Restore the Pi's previous URL and restart its browser:
-
-```sh
-cp ~/.local/state/ha-panel/backups/dashboard-20261015T140524/url ~/.config/ha-panel/url
-systemctl --user restart ha-panel
-```
-
-This immediately returns the panel to the original Home dashboard. To remove the new dashboard entirely, delete “Panel” and its `/local/ha-pop/ha-pop-panel.js` resource in Home Assistant's dashboard settings. The backups above retain its prior registrations and source for recovery.
+The installer stores backups under `/config/ha-pop-backups/`. To remove the panel dashboard, delete “Panel” and its `/local/ha-pop/ha-pop-panel.js` resource in Home Assistant's dashboard settings. Specific deployment backup records are in the [changelog](../CHANGELOG.md).

@@ -4,7 +4,7 @@ This directory contains everything installed on the Raspberry Pi: the Chromium l
 
 ## Configuration
 
-The panel is a Raspberry Pi 5 running Raspberry Pi OS 64-bit, Debian 13.7 (trixie). LightDM automatically logs into labwc as `paneluser`. The hostname is configured in Raspberry Pi OS; Avahi can advertise `panel.local` on the local network.
+The panel is a Raspberry Pi 5 running Raspberry Pi OS 64-bit, Debian 13.7 (trixie). LightDM automatically logs into labwc as `ha`. The hostname is configured in Raspberry Pi OS; Avahi can advertise `panel.local` on the local network.
 
 The display is mounted in portrait at 720 × 1280, 60 Hz, with touch mapped to `DSI-1`. Chromium opens `https://homeassistant.example/ha-pop-panel/home` in fullscreen kiosk mode using a persistent Home Assistant session. The [dashboard guide](../custom_components/ha_pop/docs/dashboard.md) covers its sections and popup controls.
 
@@ -32,7 +32,7 @@ Copy only this directory to the Pi:
 
 ```sh
 tar -cf - panel |
-  ssh -i ~/.ssh/homeassistant paneluser@panel.local 'mkdir -p ~/.local/share/ha-panel-source; tar -xf - -C ~/.local/share/ha-panel-source'
+  ssh -i ~/.ssh/homeassistant ha@panel.local 'mkdir -p ~/.local/share/ha-panel-source; tar -xf - -C ~/.local/share/ha-panel-source'
 ```
 
 The installer requires Chromium, curl, labwc, systemd user services, swayidle, wlopm, Python GTK3 bindings, `gir1.2-gtklayershell-0.1`, and `python3-gi-cairo`. Prepare the patched Squeekboard binary using the [keyboard build guide](docs/keyboard.md). Run the complete installer as the desktop user in the graphical session, or over SSH with its session environment imported into the user service manager:
@@ -52,7 +52,7 @@ The launcher uses Wayland input support and `--password-store=basic` to avoid a 
 
 Use a dedicated regular Home Assistant account and sign in once on the panel. Anyone using the touchscreen can operate controls available to that account. Dashboard visibility does not provide entity-level access control.
 
-Run these commands over SSH as `paneluser`:
+Run these commands over SSH as `ha`:
 
 ```sh
 systemctl --user status ha-panel --no-pager --lines=5
@@ -78,7 +78,7 @@ Native touch events allow Chromium to handle finger scrolling and sliders. Reloa
 Connect with:
 
 ```sh
-ssh paneluser@panel.local -i ~/.ssh/homeassistant
+ssh ha@panel.local -i ~/.ssh/homeassistant
 ```
 
 Use the Pi's LAN address as a fallback if mDNS is unavailable.

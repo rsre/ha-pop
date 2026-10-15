@@ -17,7 +17,7 @@ The repository's [patch](../../panel/squeekboard-overlay.patch) changes the requ
 
 The build uses the official Raspberry Pi source package `1.43.1-1+rpt1`, matching the installed package. Compiler and Rust dependencies use about 1 GB of additional SD space. Enable Debian source repositories before installing build dependencies.
 
-On the Pi, as `paneluser`, with this repository available:
+On the Pi, as `ha`, with this repository available:
 
 ```sh
 sudo apt-get update

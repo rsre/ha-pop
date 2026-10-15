@@ -22,7 +22,7 @@ Home Assistant can [wake the screen on command and show the doorbell video](../.
 
 ## Adjust or control
 
-Run over SSH as `paneluser`:
+Run over SSH as `ha`:
 
 ```sh
 # Change the duration, then reload the service.

@@ -1,0 +1,49 @@
+# Home Assistant package; shared authorization lives in secrets.yaml.
+rest_command:
+  ha_panel_wake:
+    url: http://192.0.2.10:8765/wake
+    method: POST
+    headers:
+      Authorization: !secret ha_panel_authorization
+    timeout: 10
+
+input_button:
+  ha_panel_doorbell:
+    name: Panel doorbell popup
+    icon: mdi:doorbell-video
+
+script:
+  ha_panel_wake:
+    alias: Wake wall panel
+    icon: mdi:tablet-dashboard
+    mode: restart
+    sequence:
+      - action: rest_command.ha_panel_wake
+        response_variable: panel_response
+      - if: "{{ panel_response.status != 200 }}"
+        then:
+          - stop: Panel wake failed
+            error: true
+  ha_panel_doorbell:
+    alias: Show doorbell on wall panel
+    icon: mdi:doorbell-video
+    mode: restart
+    sequence:
+      - action: script.ha_panel_wake
+      - action: input_button.press
+        target:
+          entity_id: input_button.ha_panel_doorbell
+
+automation:
+  - id: ha_pop_show_doorbell_on_panel
+    alias: Show doorbell on wall panel
+    mode: restart
+    triggers:
+      - trigger: event.received
+        target:
+          entity_id: event.doorbell
+        options:
+          event_type:
+            - ring
+    actions:
+      - action: script.ha_panel_doorbell

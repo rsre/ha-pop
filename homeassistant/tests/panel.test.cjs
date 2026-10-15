@@ -5,11 +5,11 @@ const fs = require("node:fs");
 
 const context = vm.createContext({
   HTMLElement: class { attachShadow() { this.shadowRoot = {}; } addEventListener() {} },
-  customElements: { get: () => undefined, define: () => {} },
+  customElements: { get: name => name === "videolink-doorbell" ? class {} : undefined, define: () => {} },
   window: {},
   URL,
 });
-vm.runInContext(fs.readFileSync("frontend/ha-pop-panel.js", "utf8") + "\nglobalThis.Panel = HaPopPanel;", context);
+vm.runInContext(fs.readFileSync(require("node:path").join(__dirname, "../../custom_components/ha_pop/frontend/ha-pop-panel.js"), "utf8") + "\nglobalThis.Panel = HaPopPanel;", context);
 
 function panel(overrides = {}) {
   const card = new context.Panel();
@@ -100,4 +100,17 @@ test("doorbell commands ignore initial and stale state, and open fresh presses o
   card.shadowRoot.querySelector = () => ({ open: true });
   set(new Date(Date.now() + 100).toISOString());
   assert.equal(opens, 1);
+});
+
+
+test("camera works with the native HA card when no video/talk card is installed", () => {
+  const original = context.customElements.get;
+  context.customElements.get = () => undefined;
+  try {
+    const config = panel()._popupConfig("camera").cards[0];
+    assert.equal(config.type, "picture-entity");
+    assert.equal(config.camera_view, "live");
+  } finally {
+    context.customElements.get = original;
+  }
 });

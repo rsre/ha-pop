@@ -1,0 +1,40 @@
+blueprint:
+  name: Wake panel and show doorbell
+  description: Show live video on the panel when a doorbell event is received.
+  domain: automation
+  homeassistant:
+    min_version: 2026.10.0
+  input:
+    doorbell:
+      name: Doorbell event entity
+      selector:
+        entity:
+          domain: event
+    event_types:
+      name: Ring event types
+      default:
+        - ring
+      selector:
+        select:
+          options:
+            - ring
+          multiple: true
+          custom_value: true
+    panel_button:
+      name: Panel Show doorbell button
+      selector:
+        entity:
+          filter:
+            - integration: ha_pop
+              domain: button
+mode: restart
+triggers:
+  - trigger: event.received
+    target:
+      entity_id: !input doorbell
+    options:
+      event_type: !input event_types
+actions:
+  - action: button.press
+    target:
+      entity_id: !input panel_button

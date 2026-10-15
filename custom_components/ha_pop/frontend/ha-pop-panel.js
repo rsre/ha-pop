@@ -1,4 +1,4 @@
-const HA_POP_VERSION = "0.1.2";
+const HA_POP_VERSION = "0.2.0";
 
 const HA_POP_ENTITIES = Object.freeze({
   kitchen_1: "switch.kitchen_light_1",
@@ -108,7 +108,7 @@ class HaPopPanel extends HTMLElement {
           <img alt="Vista del portón" draggable="false" hidden>
           <div class="camera-fallback">${this._icon("cctv")}</div>
           <div class="camera-shade"></div>
-          <span class="camera-badge">${this._icon("camera-outline")} PORTÓN</span>
+          <span class="camera-badge">${this._icon("camera-outline")} DOORBELL</span>
           <span class="camera-bottom"><span><strong>Una mirada fuera</strong><span>Ver cámara y hablar</span></span><span class="camera-open">${this._icon("arrow-top-right")}</span></span>
         </button>
 
@@ -251,7 +251,7 @@ class HaPopPanel extends HTMLElement {
     const e = this._entities;
     const entities = (title, rows) => ({ title, cards: [{ type: "entities", show_header_toggle: false, entities: rows }] });
     switch (key) {
-      case "camera": return { title: "Portón", cards: [{ type: "custom:videolink-doorbell", entity: e.camera, title: "", video_fit: "contain", talk_mode: "native", enable_popup: false, ...this._config.camera_card, entity: e.camera }] };
+      case "camera": return { title: "Doorbell", cards: [{ type: customElements.get("videolink-doorbell") ? "custom:videolink-doorbell" : "picture-entity", camera_view: "live", show_name: false, show_state: false, entity: e.camera, title: "", video_fit: "contain", talk_mode: "native", enable_popup: false, ...this._config.camera_card, entity: e.camera }] };
       case "coffee": return entities("Cafetera", [{ entity: e.coffee, name: "Encendida" }, { entity: e.coffee_schedule, name: "Encendido automático" }, { entity: e.coffee_time, name: "Encender a las" }]);
       case "climate": return { title: "Calefacción", cards: [{ type: "thermostat", entity: e.climate }] };
       case "hot_water": return entities("Agua caliente", [{ entity: e.hot_water, name: "Temperatura de consigna" }]);

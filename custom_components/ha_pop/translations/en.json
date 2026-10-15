@@ -1,0 +1,64 @@
+{
+  "title": "HA Pop Panel",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect your panel",
+        "description": "Enter the shared token from the Pi. The connection check does not wake the screen. Use an unused dashboard URL.",
+        "data": {
+          "name": "Panel name",
+          "host": "Panel hostname or IP",
+          "port": "Port",
+          "token": "Shared panel token",
+          "camera": "Doorbell camera",
+          "dashboard_path": "Dashboard URL path"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure panel",
+        "description": "Re-enter the shared token. Edit camera and card mappings in the dashboard UI; changing the URL requires removing and re-adding the integration.",
+        "data": {
+          "name": "Panel name",
+          "host": "Panel hostname or IP",
+          "port": "Port",
+          "token": "Shared panel token",
+          "camera": "Doorbell camera",
+          "dashboard_path": "Dashboard URL path"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot reach the panel. Check its address and update the Pi endpoint if /health is unavailable.",
+      "invalid_auth": "The shared token was rejected.",
+      "invalid_config": "Check the panel name, hostname, token, and dashboard URL.",
+      "dashboard_exists": "That dashboard URL already exists. Choose another URL.",
+      "dashboard_path_changed": "Keep the existing dashboard URL when reconfiguring."
+    },
+    "abort": {
+      "already_configured": "This panel is already configured.",
+      "wrong_device": "This address belongs to a different panel.",
+      "reconfigure_successful": "Panel configuration updated."
+    }
+  },
+  "entity": {
+    "button": {
+      "wake": {
+        "name": "Wake"
+      },
+      "sleep": {
+        "name": "Sleep"
+      },
+      "doorbell": {
+        "name": "Show doorbell"
+      }
+    },
+    "event": {
+      "doorbell_command": {
+        "name": "Doorbell command",
+        "event_types": {
+          "show": "Show doorbell"
+        }
+      }
+    }
+  }
+}

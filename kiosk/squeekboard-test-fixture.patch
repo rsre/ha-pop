@@ -1,0 +1,9 @@
+--- a/src/state.rs
++++ b/src/state.rs
+@@ -850,6 +850,7 @@
+         assert_eq!(
+             Application::get_preferred_height_and_arrangement(&OutputState {
++                name: None,
+                 current_mode: Some(Mode {
+                     width: pixel_width,
+                     height: pixel_height,

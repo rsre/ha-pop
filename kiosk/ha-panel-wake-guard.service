@@ -1,0 +1,11 @@
+[Unit]
+Description=Consume the wake gesture before exposing the touchscreen dashboard
+PartOf=graphical-session.target
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/python3 %h/.local/bin/ha-panel-wake-guard.py
+ExecStopPost=/usr/bin/wlopm --on DSI-1
+TimeoutStartSec=10
+TimeoutStopSec=3
+Environment=NO_AT_BRIDGE=1

@@ -1,8 +1,14 @@
 # Changelog
 
-Project changes and verification history. Deployment addresses, account names, entity mappings, and private backup locations are intentionally excluded from the public record. Current setup is described in the [panel guide](panel/README.md) and [integration guide](custom_components/ha_pop/README.md).
+Project changes and verification history. Deployment addresses, account names, entity mappings, and private backup locations are intentionally excluded from the public record. Current deployment instructions are in the [README](README.md). Older entries describe the retired implementation; its source remains in Git history.
 
-## Unreleased — integration 0.2.3
+## Unreleased — TouchKio deployment documentation
+
+- Replace the custom kiosk and Home Assistant implementation with TouchKio deployment instructions.
+- Remove custom services, installers, keyboard patches, integration, frontend, blueprints, tests, HACS metadata, and the validation workflow.
+- Document optional MQTT controls and migration of Home Assistant configuration. No TouchKio deployment was performed.
+
+## Archived — integration 0.2.3
 
 - Close panel popups and release camera media when the sleep guard activates, for idle timeout and explicit sleep. Mark pending doorbell navigation dismissed so waking returns to the main dashboard. Browser-control failure does not block sleep.
 

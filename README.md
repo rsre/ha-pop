@@ -14,7 +14,7 @@ Create:
 - a dedicated regular user for the panel
 - a Mosquitto account for the panel
 
-## Install
+## Install Touchkio in the Raspberry Pi
 
 Run these commands in a terminal **on the Pi**, as the desktop account, without prefixing the installer with sudo:
 
@@ -44,7 +44,7 @@ The config used is:
 
 Reboot and verify automatic login, kiosk startup, persistent HA login, scrolling, keyboard input, and touch-to-wake.
 
-## Maintenance
+### Maintenance
 
 Reconfigure with the service stopped:
 
@@ -64,3 +64,25 @@ bash <(wget -qO- https://raw.githubusercontent.com/leukipp/touchkio/main/install
 
 Use `systemctl --user restart touchkio.service` after configuration changes.
 For problems, consult the [upstream troubleshooting guide](https://github.com/leukipp/touchkio#issues) and [hardware FAQ](https://github.com/leukipp/touchkio/blob/main/HARDWARE.md#faq).
+
+## Install kiosk-mode in Home Assistant
+
+[kiosk-mode](https://github.com/NemesisRE/kiosk-mode#installation) hides Home Assistant's header and sidebar inside TouchKio.
+
+1. In **HACS**, search for **Kiosk Mode** and download it.
+2. Reload the dashboard in TouchKio. Set its `web_url` to your dashboard with `?kiosk`, for example:
+
+   ```json
+   "web_url": ["https://ha.rsanzr.com/dashboard-panel/home?kiosk"]
+   ```
+
+   Replace the dashboard path with yours. Use `&kiosk` if the URL already has query parameters, then restart TouchKio.
+
+Alternatively, for dashboard-wide settings, create a dashboard from scratch, open **Edit dashboard → Raw configuration editor**, and add this alongside the existing `views:` key:
+
+```yaml
+kiosk_mode:
+  kiosk: true
+```
+
+Refresh after saving. To temporarily restore navigation for editing, open the dashboard with `?disable_km` (or `&disable_km`). Verify the header and sidebar disappear on the panel and return with this override.
